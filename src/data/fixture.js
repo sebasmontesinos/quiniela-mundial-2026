@@ -1,0 +1,290 @@
+/**
+ * Fixture completo Mundial 2026 — 104 partidos (72 grupos + 32 eliminatoria).
+ * 48 selecciones confirmadas en 12 grupos de 4. 16 sedes en México, EE. UU. y Canadá.
+ */
+
+const VENUES = [
+  { stadium: 'Estadio Azteca', city: 'Ciudad de México', country: 'México' },
+  { stadium: 'Estadio Akron', city: 'Guadalajara', country: 'México' },
+  { stadium: 'Estadio BBVA', city: 'Monterrey', country: 'México' },
+  { stadium: 'MetLife Stadium', city: 'East Rutherford', country: 'USA' },
+  { stadium: 'SoFi Stadium', city: 'Los Ángeles', country: 'USA' },
+  { stadium: 'AT&T Stadium', city: 'Dallas', country: 'USA' },
+  { stadium: 'Arrowhead Stadium', city: 'Kansas City', country: 'USA' },
+  { stadium: 'Mercedes-Benz Stadium', city: 'Atlanta', country: 'USA' },
+  { stadium: 'Lincoln Financial Field', city: 'Philadelphia', country: 'USA' },
+  { stadium: 'Gillette Stadium', city: 'Boston', country: 'USA' },
+  { stadium: 'Hard Rock Stadium', city: 'Miami', country: 'USA' },
+  { stadium: 'Lumen Field', city: 'Seattle', country: 'USA' },
+  { stadium: 'NRG Stadium', city: 'Houston', country: 'USA' },
+  { stadium: "Levi's Stadium", city: 'San Francisco', country: 'USA' },
+  { stadium: 'BMO Field', city: 'Toronto', country: 'Canadá' },
+  { stadium: 'BC Place', city: 'Vancouver', country: 'Canadá' },
+];
+
+export const GROUPS = {
+  A: ['México', 'Sudáfrica', 'Corea del Sur', 'República Checa'],
+  B: ['Canadá', 'Bosnia y Herzegovina', 'Catar', 'Suiza'],
+  C: ['Brasil', 'Marruecos', 'Haití', 'Escocia'],
+  D: ['Estados Unidos', 'Paraguay', 'Australia', 'Turquía'],
+  E: ['Alemania', 'Curazao', 'Costa de Marfil', 'Ecuador'],
+  F: ['Países Bajos', 'Japón', 'Suecia', 'Túnez'],
+  G: ['Bélgica', 'Egipto', 'Irán', 'Nueva Zelanda'],
+  H: ['España', 'Cabo Verde', 'Arabia Saudita', 'Uruguay'],
+  I: ['Francia', 'Senegal', 'Irak', 'Noruega'],
+  J: ['Argentina', 'Argelia', 'Austria', 'Jordania'],
+  K: ['Portugal', 'RD Congo', 'Uzbekistán', 'Colombia'],
+  L: ['Inglaterra', 'Croacia', 'Ghana', 'Panamá'],
+};
+
+const GROUP_LETTERS = Object.keys(GROUPS);
+
+function utc(year, month, day, hour = 18, minute = 0) {
+  return new Date(Date.UTC(year, month - 1, day, hour, minute));
+}
+
+function pickVenue(index) {
+  return VENUES[index % VENUES.length];
+}
+
+const GROUP_PAIRINGS = [
+  [0, 1],
+  [2, 3],
+  [0, 2],
+  [1, 3],
+  [0, 3],
+  [1, 2],
+];
+
+/** Desplazamiento en días desde el 11 de junio para cada fecha de cada grupo. */
+const GROUP_SCHEDULE = {
+  A: [0, 7, 13],
+  B: [0, 6, 12],
+  C: [1, 6, 12],
+  D: [1, 7, 13],
+  E: [2, 8, 14],
+  F: [2, 8, 14],
+  G: [3, 9, 15],
+  H: [3, 9, 15],
+  I: [4, 10, 16],
+  J: [4, 10, 16],
+  K: [5, 11, 16],
+  L: [5, 11, 16],
+};
+
+function buildGroupMatches() {
+  const matches = [];
+  let venueIndex = 0;
+  const baseDate = utc(2026, 6, 11);
+
+  GROUP_LETTERS.forEach((group, gIndex) => {
+    const teams = GROUPS[group];
+    const offsets = GROUP_SCHEDULE[group];
+
+    GROUP_PAIRINGS.forEach((pair, matchIdx) => {
+      const md = Math.floor(matchIdx / 2);
+      const matchInDay = matchIdx % 2;
+      const dayOffset = offsets[md];
+
+      const matchDate = new Date(baseDate);
+      matchDate.setUTCDate(baseDate.getUTCDate() + dayOffset);
+      matchDate.setUTCHours(14 + matchInDay * 3, 0, 0, 0);
+
+      let venue;
+      const matchId = `GS_${group}_${matchIdx + 1}`;
+
+      if (group === 'A') {
+        if (matchIdx === 0) venue = VENUES[0];
+        else if (matchIdx === 2) venue = VENUES[1];
+        else if (matchIdx === 4) venue = VENUES[0];
+        else venue = VENUES[venueIndex % VENUES.length];
+        venueIndex++;
+      } else {
+        venue = VENUES[venueIndex++ % VENUES.length];
+      }
+
+      let homeTeam = teams[pair[0]];
+      let awayTeam = teams[pair[1]];
+
+      if (group === 'A' && matchIdx === 4) {
+        homeTeam = teams[3];
+        awayTeam = teams[0];
+      }
+
+      matches.push({
+        id: matchId,
+        stage: 'group',
+        group,
+        matchNumber: gIndex * 6 + matchIdx + 1,
+        homeTeam,
+        awayTeam,
+        matchDate,
+        stadium: venue.stadium,
+        city: `${venue.city}, ${venue.country}`,
+        status: 'upcoming',
+        homeScore: null,
+        awayScore: null,
+        locked: false,
+      });
+    });
+  });
+
+  return matches;
+}
+
+function knockoutMatch(config) {
+  return {
+    stage: config.stage,
+    group: null,
+    matchNumber: config.matchNumber,
+    homeTeam: config.homeTeam,
+    awayTeam: config.awayTeam,
+    matchDate: config.matchDate,
+    stadium: config.venue.stadium,
+    city: `${config.venue.city}, ${config.venue.country}`,
+    status: 'upcoming',
+    homeScore: null,
+    awayScore: null,
+    locked: false,
+    id: config.id,
+  };
+}
+
+function buildKnockoutMatches() {
+  const r32Defs = [
+    ['1º Grupo A', '3º Grupo E/F/H/I', utc(2026, 6, 28, 16)],
+    ['2º Grupo C', '2º Grupo D', utc(2026, 6, 28, 19)],
+    ['2º Grupo A', '2º Grupo B', utc(2026, 6, 28, 22)],
+    ['1º Grupo E', '3º Grupo A/B/C/D', utc(2026, 6, 29, 14)],
+    ['1º Grupo D', '3º Grupo C/E/H/I', utc(2026, 6, 29, 17)],
+    ['1º Grupo B', '3º Grupo A/C/F/G', utc(2026, 6, 29, 20)],
+    ['1º Grupo F', '2º Grupo E', utc(2026, 6, 30, 16)],
+    ['1º Grupo G', '3º Grupo A/B/C/F', utc(2026, 6, 30, 19)],
+    ['1º Grupo C', '3º Grupo B/E/F/I', utc(2026, 6, 30, 22)],
+    ['2º Grupo G', '2º Grupo H', utc(2026, 7, 1, 14)],
+    ['1º Grupo H', '2º Grupo I', utc(2026, 7, 1, 17)],
+    ['1º Grupo I', '2º Grupo J', utc(2026, 7, 1, 20)],
+    ['2º Grupo K', '2º Grupo L', utc(2026, 7, 2, 17)],
+    ['1º Grupo J', '2º Grupo F', utc(2026, 7, 2, 20)],
+    ['1º Grupo K', '3º Grupo D/E/I/J', utc(2026, 7, 3, 17)],
+    ['1º Grupo L', '3º Grupo E/H/I/J', utc(2026, 7, 3, 20)],
+  ];
+
+  const r32 = r32Defs.map(([home, away, date], i) =>
+    knockoutMatch({
+      id: `R32_${i + 1}`,
+      stage: 'r32',
+      matchNumber: 73 + i,
+      homeTeam: home,
+      awayTeam: away,
+      matchDate: date,
+      venue: pickVenue(3 + i),
+    })
+  );
+
+  const r16Defs = [
+    ['Ganador R32 1', 'Ganador R32 2', utc(2026, 7, 4, 16)],
+    ['Ganador R32 3', 'Ganador R32 4', utc(2026, 7, 4, 20)],
+    ['Ganador R32 5', 'Ganador R32 6', utc(2026, 7, 5, 16)],
+    ['Ganador R32 7', 'Ganador R32 8', utc(2026, 7, 5, 20)],
+    ['Ganador R32 9', 'Ganador R32 10', utc(2026, 7, 6, 16)],
+    ['Ganador R32 11', 'Ganador R32 12', utc(2026, 7, 6, 20)],
+    ['Ganador R32 13', 'Ganador R32 14', utc(2026, 7, 7, 17)],
+    ['Ganador R32 15', 'Ganador R32 16', utc(2026, 7, 7, 21)],
+  ];
+
+  const r16 = r16Defs.map(([home, away, date], i) =>
+    knockoutMatch({
+      id: `R16_${i + 1}`,
+      stage: 'r16',
+      matchNumber: 89 + i,
+      homeTeam: home,
+      awayTeam: away,
+      matchDate: date,
+      venue: pickVenue(11 + i),
+    })
+  );
+
+  const qfDefs = [
+    ['Ganador R16 1', 'Ganador R16 2', utc(2026, 7, 9, 18)],
+    ['Ganador R16 3', 'Ganador R16 4', utc(2026, 7, 10, 17)],
+    ['Ganador R16 5', 'Ganador R16 6', utc(2026, 7, 11, 16)],
+    ['Ganador R16 7', 'Ganador R16 8', utc(2026, 7, 11, 20)],
+  ];
+
+  const qf = qfDefs.map(([home, away, date], i) =>
+    knockoutMatch({
+      id: `QF_${i + 1}`,
+      stage: 'qf',
+      matchNumber: 97 + i,
+      homeTeam: home,
+      awayTeam: away,
+      matchDate: date,
+      venue: pickVenue(6 + i),
+    })
+  );
+
+  const sf = [
+    knockoutMatch({
+      id: 'SF_1',
+      stage: 'sf',
+      matchNumber: 101,
+      homeTeam: 'Ganador QF 1',
+      awayTeam: 'Ganador QF 2',
+      matchDate: utc(2026, 7, 14, 20),
+      venue: VENUES[4],
+    }),
+    knockoutMatch({
+      id: 'SF_2',
+      stage: 'sf',
+      matchNumber: 102,
+      homeTeam: 'Ganador QF 3',
+      awayTeam: 'Ganador QF 4',
+      matchDate: utc(2026, 7, 15, 20),
+      venue: VENUES[3],
+    }),
+  ];
+
+  const third = knockoutMatch({
+    id: 'THIRD',
+    stage: 'third',
+    matchNumber: 103,
+    homeTeam: 'Perdedor SF 1',
+    awayTeam: 'Perdedor SF 2',
+    matchDate: utc(2026, 7, 18, 19),
+    venue: VENUES[5],
+  });
+
+  const final = knockoutMatch({
+    id: 'FINAL',
+    stage: 'final',
+    matchNumber: 104,
+    homeTeam: 'Ganador SF 1',
+    awayTeam: 'Ganador SF 2',
+    matchDate: utc(2026, 7, 19, 20),
+    venue: VENUES[3],
+  });
+
+  return [...r32, ...r16, ...qf, ...sf, third, final];
+}
+
+const groupMatches = buildGroupMatches();
+const knockoutMatches = buildKnockoutMatches();
+
+export const MATCHES = [...groupMatches, ...knockoutMatches];
+
+export const STAGE_LABELS = {
+  group: 'Fase de grupos',
+  r32: 'Dieciseisavos de final',
+  r16: 'Octavos de final',
+  qf: 'Cuartos de final',
+  sf: 'Semifinales',
+  third: 'Tercer puesto',
+  final: 'Final',
+};
+
+export const STAGE_ORDER = ['group', 'r32', 'r16', 'qf', 'sf', 'third', 'final'];
+
+if (MATCHES.length !== 104) {
+  console.warn(`[fixture] Se esperaban 104 partidos, hay ${MATCHES.length}`);
+}
