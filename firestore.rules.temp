@@ -1,0 +1,13 @@
+// WARNING: DEVELOPMENT ONLY — open rules for local emulator testing
+// Before deploying to production, run:
+//   cp firestore.rules.production firestore.rules
+//   firebase deploy --only firestore:rules
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}

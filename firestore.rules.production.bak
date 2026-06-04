@@ -1,0 +1,264 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── /meta — app bootstrap metadata ────────────────────────
+    match /meta/{docId} {
+      // Any signed-in user can read meta; only create once
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+        && docId == 'app'
+        && !exists(/databases/$(database)/documents/meta/app);
+      allow update, delete: if false;
+    }
+
+    // ── /users — user profiles ──────────────────────────────
+    match /users/{userId} {
+      // Read own document, or admin reads any
+      allow read: if request.auth != null
+        && (
+          request.auth.uid == userId
+          || get(/databases/$(database)/documents/users/$(request.auth.uid))
+              .data.get('isAdmin', false) == true
+        );
+
+      // First-user auto-creates admin doc (no status/paidAt fields)
+      allow create: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.data.get('uid', '') == request.auth.uid
+        && request.resource.data.get('isAdmin', false) == true
+        && !('status' in request.resource.data)
+        && !('paidAt' in request.resource.data)
+        && !exists(/databases/$(database)/documents/meta/app);
+
+      // Player self-registers as pending (isAdmin absent, all required fields)
+      allow create: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.data.get('uid', '') == request.auth.uid
+        && request.resource.data.get('isAdmin', false) == false
+        && request.resource.data.get('status', '') == 'pending'
+        && request.resource.data.keys().hasAll([
+          'uid', 'name', 'email', 'photoURL', 'status', 'createdAt', 'paidAt'
+        ]);
+
+      // Admin activates/suspends a non-admin user (only changes status/paidAt)
+      allow update: if request.auth != null
+        && request.auth.uid != userId
+        && get(/databases/$(database)/documents/users/$(request.auth.uid))
+            .data.get('isAdmin', false) == true
+        && resource.data.get('isAdmin', false) == false
+        && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['status', 'paidAt'])
+        && request.resource.data.get('status', '') in ['active', 'blocked'];
+
+      // Admin self-cleanup (removes status/paidAt from own doc)
+      allow update: if request.auth != null
+        && request.auth.uid == userId
+        && get(/databases/$(database)/documents/users/$(request.auth.uid))
+            .data.get('isAdmin', false) == true
+        && resource.data.get('isAdmin', false) == true
+        && request.resource.data.get('isAdmin', false) == true
+        && !('status' in request.resource.data)
+        && !('paidAt' in request.resource.data);
+
+      // Non-admin user updates own profile (name, photoURL, email only)
+      allow update: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['name', 'photoURL', 'email']);
+
+      allow delete: if false;
+    }
+
+    // ── /matches — real match results ──────────────────────
+    match /matches/{matchId} {
+      // Active players and admins can read all matches
+      allow read: if request.auth != null
+        && (
+          get(/databases/$(database)/documents/users/$(request.auth.uid))
+              .data.get('status', '') == 'active'
+          || get(/databases/$(database)/documents/users/$(request.auth.uid))
+              .data.get('isAdmin', false) == true
+        );
+
+      // Only admin can create or delete matches
+      allow create, delete: if request.auth != null
+        && get(/databases/$(database)/documents/users/$(request.auth.uid))
+            .data.get('isAdmin', false) == true;
+
+      // Admin saves match result (homeScore, awayScore, status=finished, locked)
+      allow update: if request.auth != null
+        && get(/databases/$(database)/documents/users/$(request.auth.uid))
+            .data.get('isAdmin', false) == true
+        && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['homeScore', 'awayScore', 'status', 'locked'])
+        && request.resource.data.get('status', '') == 'finished'
+        && request.resource.data.get('locked', false) == true;
+
+      // Any active player can lock an expired match
+      allow update: if request.auth != null
+        && (
+          get(/databases/$(database)/documents/users/$(request.auth.uid))
+              .data.get('status', '') == 'active'
+          || get(/databases/$(database)/documents/users/$(request.auth.uid))
+              .data.get('isAdmin', false) == true
+        )
+        && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['locked'])
+        && resource.data.get('locked', true) == false
+        && request.resource.data.get('locked', false) == true
+        && resource.data.get('matchDate', 0) <= request.time;
+    }
+
+    // ── /predictions — real user predictions ──────────────
+    match /predictions/{predictionId} {
+      // Read own predictions, or admin reads all
+      allow read: if request.auth != null
+        && (
+          resource.data.get('userId', '') == request.auth.uid
+          || get(/databases/$(database)/documents/users/$(request.auth.uid))
+              .data.get('isAdmin', false) == true
+        );
+
+      // Active player creates own prediction for an unlocked match
+      allow create: if request.auth != null
+        && (
+          get(/databases/$(database)/documents/users/$(request.auth.uid))
+              .data.get('status', '') == 'active'
+          || get(/databases/$(database)/documents/users/$(request.auth.uid))
+              .data.get('isAdmin', false) == true
+        )
+        && request.resource.data.get('userId', '') == request.auth.uid
+        && predictionId == request.auth.uid + '_' + request.resource.data.get('matchId', '')
+        && get(/databases/$(database)/documents/matches/$(request.resource.data.get('matchId', '')))
+            .data.get('locked', true) == false
+        && request.resource.data.keys().hasAll([
+          'userId', 'matchId', 'predictedWinner',
+          'predictedHomeScore', 'predictedAwayScore', 'createdAt', 'updatedAt'
+        ])
+        && request.resource.data.get('points', null) == null;
+
+      // Active player updates own prediction (match still unlocked)
+      allow update: if request.auth != null
+        && (
+          get(/databases/$(database)/documents/users/$(request.auth.uid))
+              .data.get('status', '') == 'active'
+          || get(/databases/$(database)/documents/users/$(request.auth.uid))
+              .data.get('isAdmin', false) == true
+        )
+        && resource.data.get('userId', '') == request.auth.uid
+        && request.resource.data.get('userId', '') == request.auth.uid
+        && get(/databases/$(database)/documents/matches/$(resource.data.get('matchId', '')))
+            .data.get('locked', true) == false
+        && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly([
+              'predictedWinner', 'predictedHomeScore', 'predictedAwayScore', 'updatedAt'
+            ])
+        && request.resource.data.get('points', null) == resource.data.get('points', null);
+
+      // Admin batch-updates points after scoring
+      allow update: if request.auth != null
+        && get(/databases/$(database)/documents/users/$(request.auth.uid))
+            .data.get('isAdmin', false) == true
+        && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['points']);
+
+      allow delete: if false;
+    }
+
+    // ── /app_settings — global config (simulation toggle) ──
+    match /app_settings/{docId} {
+      // Any signed-in user can read global config
+      allow read: if request.auth != null;
+
+      // Only admin can write global config
+      allow write: if request.auth != null
+        && get(/databases/$(database)/documents/users/$(request.auth.uid))
+            .data.get('isAdmin', false) == true;
+    }
+
+    // ── /sim_matches — simulated match results ────────────
+    match /sim_matches/{matchId} {
+      // Active players and admins can read simulation data
+      allow read: if request.auth != null
+        && (
+          get(/databases/$(database)/documents/users/$(request.auth.uid))
+              .data.get('status', '') == 'active'
+          || get(/databases/$(database)/documents/users/$(request.auth.uid))
+              .data.get('isAdmin', false) == true
+        );
+
+      // Only admin can write simulation results
+      allow write: if request.auth != null
+        && get(/databases/$(database)/documents/users/$(request.auth.uid))
+            .data.get('isAdmin', false) == true;
+    }
+
+    // ── /sim_predictions — simulated prediction points ─────
+    match /sim_predictions/{predictionId} {
+      // Read own predictions, or active player/admin reads all
+      allow read: if request.auth != null
+        && (
+          resource.data.get('userId', '') == request.auth.uid
+          || (
+            get(/databases/$(database)/documents/users/$(request.auth.uid))
+                .data.get('status', '') == 'active'
+            || get(/databases/$(database)/documents/users/$(request.auth.uid))
+                .data.get('isAdmin', false) == true
+          )
+        );
+
+      // Active player creates own sim prediction for an unlocked sim match
+      allow create: if request.auth != null
+        && (
+          get(/databases/$(database)/documents/users/$(request.auth.uid))
+              .data.get('status', '') == 'active'
+          || get(/databases/$(database)/documents/users/$(request.auth.uid))
+              .data.get('isAdmin', false) == true
+        )
+        && request.resource.data.get('userId', '') == request.auth.uid
+        && predictionId == request.auth.uid + '_' + request.resource.data.get('matchId', '')
+        && get(/databases/$(database)/documents/sim_matches/$(request.resource.data.get('matchId', '')))
+            .data.get('locked', true) == false
+        && request.resource.data.keys().hasAll([
+          'userId', 'matchId', 'predictedWinner',
+          'predictedHomeScore', 'predictedAwayScore', 'createdAt', 'updatedAt'
+        ])
+        && request.resource.data.get('points', null) == null;
+
+      // Active player updates own sim prediction (sim match still unlocked)
+      allow update: if request.auth != null
+        && (
+          get(/databases/$(database)/documents/users/$(request.auth.uid))
+              .data.get('status', '') == 'active'
+          || get(/databases/$(database)/documents/users/$(request.auth.uid))
+              .data.get('isAdmin', false) == true
+        )
+        && resource.data.get('userId', '') == request.auth.uid
+        && request.resource.data.get('userId', '') == request.auth.uid
+        && get(/databases/$(database)/documents/sim_matches/$(resource.data.get('matchId', '')))
+            .data.get('locked', true) == false
+        && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly([
+              'predictedWinner', 'predictedHomeScore', 'predictedAwayScore', 'updatedAt'
+            ])
+        && request.resource.data.get('points', null) == resource.data.get('points', null);
+
+      // Admin batch-updates sim points after applying a simulated result
+      allow update: if request.auth != null
+        && get(/databases/$(database)/documents/users/$(request.auth.uid))
+            .data.get('isAdmin', false) == true
+        && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['points']);
+
+      allow delete: if false;
+    }
+
+    // ── Catch-all: deny everything else ───────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+  }
+}

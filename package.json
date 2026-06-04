@@ -8,7 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "seed:fixture": "node scripts/seedFixture.js",
+    "seed:fixture": "node --env-file=.env scripts/seedFixture.js",
     "test": "vitest run",
     "test:watch": "vitest"
   },
