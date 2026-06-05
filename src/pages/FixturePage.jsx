@@ -15,31 +15,12 @@ import {
 } from '../services/simulation';
 import { formatMatchDate, dateKey } from '../constants';
 import { CardSkeleton } from '../components/Skeleton';
-import { getTeamCrest } from '../data/teamCrests';
+import { getTeamFlag } from '../data/teamCrests';
 
-function TeamLogo({ teamName, size = 32 }) {
-  const crest = getTeamCrest(teamName);
-  const [error, setError] = useState(false);
-
-  if (crest && !error) {
-    return (
-      <img
-        src={crest}
-        alt={teamName}
-        className="inline-block rounded-full object-contain flex-shrink-0"
-        style={{ width: size, height: size }}
-        onError={() => setError(true)}
-      />
-    );
-  }
-
-  const initial = (teamName || '?')[0].toUpperCase();
+function TeamLogo({ teamName }) {
   return (
-    <span
-      className="inline-flex items-center justify-center rounded-full bg-fifa-gold/20 text-fifa-gold font-bold text-xs flex-shrink-0"
-      style={{ width: size, height: size }}
-    >
-      {initial}
+    <span className="inline-block text-[28px] leading-none mr-2" role="img" aria-label={teamName}>
+      {getTeamFlag(teamName)}
     </span>
   );
 }
@@ -170,13 +151,13 @@ function MatchCard({ match, prediction, userId, onPredictionSaved, simulationMod
               Grupo {match.group}
             </span>
           )}
-          <p className="text-xl font-bold text-white mt-1 flex items-center gap-2 flex-wrap">
-            <span className="flex items-center gap-1.5">
+          <p className="text-xl font-bold text-white mt-1 flex items-center flex-wrap">
+            <span className="flex items-center whitespace-nowrap">
               <TeamLogo teamName={match.homeTeam} />
               {match.homeTeam}
             </span>
-            <span className="text-[#94A3B8] font-normal text-base">vs</span>
-            <span className="flex items-center gap-1.5">
+            <span className="text-[#94A3B8] font-normal text-base mx-2">vs</span>
+            <span className="flex items-center whitespace-nowrap">
               <TeamLogo teamName={match.awayTeam} />
               {match.awayTeam}
             </span>
