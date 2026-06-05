@@ -11,6 +11,7 @@ import StandingsPage from './pages/StandingsPage';
 import PendingScreen from './pages/PendingScreen';
 import BlockedScreen from './pages/BlockedScreen';
 import AdminPanel from './pages/AdminPanel';
+import ProfilePage from './pages/ProfilePage';
 
 function ProtectedRoute({ children }) {
   const { currentUser } = useAuth();
@@ -92,6 +93,14 @@ function AuthenticatedRoutes() {
             <AdminRoute>
               <AdminPanel />
             </AdminRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ActivePlayerRoute>
+              <ProfilePage />
+            </ActivePlayerRoute>
           }
         />
         <Route path="*" element={<Navigate to="/fixture" replace />} />

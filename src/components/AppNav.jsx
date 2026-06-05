@@ -9,13 +9,16 @@ const linkClass = ({ isActive }) =>
   }`;
 
 export default function AppNav() {
-  const { isAdmin, logout } = useAuth();
+  const { currentUser, userProfile, isAdmin, logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
     await logout();
     navigate('/login');
   };
+
+  const photoURL = currentUser?.photoURL;
+  const displayName = userProfile?.name || currentUser?.displayName || 'Usuario';
 
   return (
     <nav className="bg-[#0A0E1A] border-b-2 border-fifa-gold/80 backdrop-blur-md sticky top-0 z-50">
@@ -36,13 +39,32 @@ export default function AppNav() {
             </NavLink>
           )}
         </div>
-        <button
-          type="button"
-          onClick={handleLogout}
-          className="text-xs text-[#94A3B8] hover:text-[#F5A623] transition-colors"
-        >
-          Cerrar sesión
-        </button>
+        <div className="flex items-center gap-3">
+          <NavLink
+            to="/profile"
+            className="flex items-center gap-2 text-xs text-[#94A3B8] hover:text-fifa-gold transition-colors group"
+          >
+            {photoURL ? (
+              <img
+                src={photoURL}
+                alt=""
+                className="w-7 h-7 rounded-full object-cover border border-fifa-gold/30 group-hover:border-fifa-gold/60 transition-colors"
+              />
+            ) : (
+              <span className="w-7 h-7 rounded-full bg-fifa-gold/20 flex items-center justify-center text-fifa-gold text-xs font-bold border border-fifa-gold/30 group-hover:border-fifa-gold/60">
+                {(displayName || '?')[0].toUpperCase()}
+              </span>
+            )}
+            <span className="hidden sm:inline">{displayName}</span>
+          </NavLink>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="text-xs text-[#94A3B8] hover:text-[#F5A623] transition-colors"
+          >
+            Cerrar sesión
+          </button>
+        </div>
       </div>
     </nav>
   );
