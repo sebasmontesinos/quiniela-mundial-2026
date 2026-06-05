@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import AppNav from '../components/AppNav';
 import { useAuth } from '../contexts/AuthContext';
 import { STAGE_LABELS, STAGE_ORDER } from '../data/fixture';
@@ -15,6 +15,7 @@ import {
 } from '../services/simulation';
 import { formatMatchDate, dateKey } from '../constants';
 import { CardSkeleton } from '../components/Skeleton';
+import Countdown from '../components/Countdown';
 import { getTeamFlag } from '../data/teamCrests';
 
 function TeamLogo({ teamName }) {
@@ -232,6 +233,26 @@ export default function FixturePage() {
     setPredictions(map);
   };
 
+  const [showAllDone, setShowAllDone] = useState(false);
+  const prevPendingRef = useRef(null);
+
+  const pendingCount = useMemo(() => {
+    if (simulationMode) return 0;
+    return matches.filter(
+      (m) => m.status === 'upcoming' && !isMatchLocked(m) && !predictions[m.id]
+    ).length;
+  }, [matches, predictions, simulationMode]);
+
+  useEffect(() => {
+    if (simulationMode) return;
+    if (prevPendingRef.current != null && prevPendingRef.current > 0 && pendingCount === 0) {
+      setShowAllDone(true);
+      const t = setTimeout(() => setShowAllDone(false), 3000);
+      return () => clearTimeout(t);
+    }
+    prevPendingRef.current = pendingCount;
+  }, [pendingCount, simulationMode]);
+
   useEffect(() => {
     if (!currentUser) return;
 
@@ -291,6 +312,24 @@ export default function FixturePage() {
     <div className="min-h-screen bg-fifa-gradient text-[#F8FAFC]">
       <AppNav />
       <div className="max-w-4xl mx-auto p-4 sm:p-6 pb-16">
+        <Countdown />
+
+        {!simulationMode && pendingCount > 0 && (
+          <div className="bg-amber-400/20 border border-amber-400/40 text-amber-300 px-4 py-3 rounded-lg text-sm mb-6 flex items-center gap-2">
+            <span>⚠️</span>
+            <span>
+              Tenés <strong>{pendingCount}</strong> partido{pendingCount !== 1 ? 's' : ''} sin predecir. ¡El tiempo se acaba!
+            </span>
+          </div>
+        )}
+
+        {!simulationMode && showAllDone && (
+          <div className="bg-[#10B981]/20 border border-[#10B981]/40 text-[#10B981] px-4 py-3 rounded-lg text-sm mb-6 flex items-center gap-2 animate-slide-up">
+            <span>✅</span>
+            <span>¡Todas tus predicciones están cargadas!</span>
+          </div>
+        )}
+
         <header className="mb-8">
           <h1 className="text-3xl font-extrabold text-white flex items-center gap-3">
             <span className="text-fifa-gold">📅</span> Fixture Mundial 2026
