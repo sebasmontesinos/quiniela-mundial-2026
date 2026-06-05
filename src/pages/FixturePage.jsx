@@ -16,33 +16,19 @@ import {
 import { formatMatchDate, dateKey } from '../constants';
 import { CardSkeleton } from '../components/Skeleton';
 import Countdown from '../components/Countdown';
-import { getTeamFlag } from '../data/teamCrests';
-
-function TeamLogo({ teamName }) {
-  return (
-    <span
-      style={{
-        fontSize: '24px',
-        marginRight: '6px',
-        fontFamily: 'Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif',
-      }}
-    >
-      {getTeamFlag(teamName)}
-    </span>
-  );
-}
+import { TeamFlag } from '../data/teamCrests.jsx';
 
 function MatchStatusBadge({ match, locked }) {
   if (match.status === 'finished') {
     return (
-      <span className="text-xs font-semibold px-3 py-1 rounded-full bg-[#2D3748]/60 text-[#94A3B8] border border-[#2D3748]">
+      <span className="text-xs font-semibold px-3 py-1 rounded-full bg-[#4A5568]/60 text-[#CBD5E0] border border-[#4A5568]">
         Finalizado
       </span>
     );
   }
   if (match.status === 'live') {
     return (
-      <span className="text-xs font-semibold px-3 py-1 rounded-[20px] bg-fifa-red text-white border border-fifa-red animate-live-pulse">
+      <span className="text-xs font-semibold px-3 py-1 rounded-[20px] bg-[#E63946] text-white border border-[#E63946] animate-live-pulse">
         ● En vivo
       </span>
     );
@@ -55,7 +41,7 @@ function MatchStatusBadge({ match, locked }) {
     );
   }
   return (
-    <span className="text-xs font-semibold px-3 py-1 rounded-[20px] bg-fifa-gold text-[#0A0E1A] border border-fifa-gold/60">
+    <span className="text-xs font-semibold px-3 py-1 rounded-[20px] bg-[#06B894] text-white border border-[#06B894]">
       Próximo
     </span>
   );
@@ -103,37 +89,37 @@ function PredictionForm({ match, prediction, userId, onSaved, simulationMode }) 
     <form
       key={predictionKey}
       onSubmit={handleSubmit}
-      className="mt-4 pt-4 border-t border-[#2D3748]"
+      className="mt-4 pt-4 border-t border-[#3E5FD9]"
     >
       <p className="text-xs text-fifa-gold mb-3 font-medium uppercase tracking-wide">
         Tu predicción
       </p>
       <div className="flex items-center gap-3 flex-wrap">
-        <label className="flex flex-col gap-1 text-xs text-[#94A3B8]">
+        <label className="flex flex-col gap-1 text-xs text-[#B8C5F0]">
           Local
           <input
             type="number"
             min="0"
             name="homeScore"
             defaultValue={prediction?.predictedHomeScore?.toString() ?? '0'}
-            className="w-16 bg-[#111827] border border-[#2D3748] rounded-lg px-2 py-1.5 text-white text-center focus:border-fifa-gold focus:outline-none"
+            className="w-16 bg-white border border-[#CBD5E0] rounded-lg px-2 py-1.5 text-[#1A202C] text-center focus:border-fifa-gold focus:outline-none focus:ring-1 focus:ring-fifa-gold"
           />
         </label>
-        <span className="text-[#94A3B8] font-bold pt-4">—</span>
-        <label className="flex flex-col gap-1 text-xs text-[#94A3B8]">
+        <span className="text-[#B8C5F0] font-bold pt-4">—</span>
+        <label className="flex flex-col gap-1 text-xs text-[#B8C5F0]">
           Visitante
           <input
             type="number"
             min="0"
             name="awayScore"
             defaultValue={prediction?.predictedAwayScore?.toString() ?? '0'}
-            className="w-16 bg-[#111827] border border-[#2D3748] rounded-lg px-2 py-1.5 text-white text-center focus:border-fifa-gold focus:outline-none"
+            className="w-16 bg-white border border-[#CBD5E0] rounded-lg px-2 py-1.5 text-[#1A202C] text-center focus:border-fifa-gold focus:outline-none focus:ring-1 focus:ring-fifa-gold"
           />
         </label>
         <button
           type="submit"
           disabled={saving}
-          className="mt-4 bg-fifa-gold hover:bg-amber-400 text-[#0A0E1A] text-sm font-bold px-5 py-2 rounded-[8px] disabled:opacity-50 transition-all shadow-lg shadow-fifa-gold/20"
+          className="mt-4 bg-[#FFB800] hover:bg-[#FFC933] text-[#1A202C] text-sm font-bold px-5 py-2 rounded-[8px] disabled:opacity-50 transition-all shadow-lg shadow-fifa-gold/20"
         >
           {saving ? 'Guardando...' : prediction ? 'Actualizar' : 'Enviar'}
         </button>
@@ -160,12 +146,12 @@ function MatchCard({ match, prediction, userId, onPredictionSaved, simulationMod
           )}
           <p className="text-xl text-white mt-1 flex items-center flex-wrap" style={{ fontSize: '1.2rem', fontWeight: 600 }}>
             <span className="flex items-center whitespace-nowrap">
-              <TeamLogo teamName={match.homeTeam} />
+              <TeamFlag teamName={match.homeTeam} size={28} />
               {match.homeTeam}
             </span>
-            <span className="text-[#94A3B8] font-normal text-base mx-2">vs</span>
+            <span className="text-[#B8C5F0] font-normal text-base mx-2">vs</span>
             <span className="flex items-center whitespace-nowrap">
-              <TeamLogo teamName={match.awayTeam} />
+              <TeamFlag teamName={match.awayTeam} size={28} />
               {match.awayTeam}
             </span>
           </p>
@@ -173,7 +159,7 @@ function MatchCard({ match, prediction, userId, onPredictionSaved, simulationMod
         <MatchStatusBadge match={match} locked={locked} />
       </div>
 
-      <div className="text-xs text-[#94A3B8] space-y-1">
+      <div className="text-xs text-[#B8C5F0] space-y-1">
         <p>{formatMatchDate(match.matchDate)}</p>
         <p>
           {match.stadium} — {match.city}
@@ -197,7 +183,7 @@ function MatchCard({ match, prediction, userId, onPredictionSaved, simulationMod
       )}
 
       {!canPredict && prediction && (
-        <div className="mt-4 pt-4 border-t border-[#2D3748]">
+        <div className="mt-4 pt-4 border-t border-[#3E5FD9]">
           <p className="text-xs text-fifa-gold mb-1">Tu predicción</p>
           <p className="text-white font-semibold">
             {prediction.predictedHomeScore} — {prediction.predictedAwayScore}
@@ -211,7 +197,7 @@ function MatchCard({ match, prediction, userId, onPredictionSaved, simulationMod
       )}
 
       {!canPredict && !prediction && locked && match.status !== 'finished' && (
-        <p className="mt-3 text-xs text-[#94A3B8]">Predicciones cerradas.</p>
+        <p className="mt-3 text-xs text-[#B8C5F0]">Predicciones cerradas.</p>
       )}
     </div>
   );
@@ -329,10 +315,11 @@ export default function FixturePage() {
         )}
 
         <header className="mb-8">
-          <h1 className="text-4xl font-extrabold fifa-gold-gradient flex items-center gap-3">
+          <h1 className="text-4xl font-extrabold text-white flex items-center gap-3">
             📅 Fixture Mundial 2026
           </h1>
-          <p className="text-[#94A3B8] mt-1 text-sm">
+          <span className="fifa-gold-underline mt-2" />
+          <p className="text-[#B8C5F0] mt-3 text-sm">
             Cargá tus resultados antes de que arranque cada partido. 3 pts plenos, 1 pt por
             acertar el ganador.
           </p>
@@ -348,7 +335,7 @@ export default function FixturePage() {
           <div className="space-y-6">
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="space-y-3">
-                <div className="h-5 w-40 bg-[#2D3748] rounded animate-pulse" />
+                <div className="h-5 w-40 bg-[#3E5FD9] rounded animate-pulse" />
                 <div className="grid gap-4">
                   {Array.from({ length: 2 }).map((_, j) => (
                     <CardSkeleton key={j} />
@@ -359,8 +346,8 @@ export default function FixturePage() {
           </div>
         ) : matches.length === 0 ? (
           <div className="fifa-card text-center py-12">
-            <p className="text-[#94A3B8]">No hay partidos cargados.</p>
-            <p className="text-sm text-[#94A3B8] mt-2">
+            <p className="text-[#B8C5F0]">No hay partidos cargados.</p>
+            <p className="text-sm text-[#B8C5F0] mt-2">
               Ejecutá <code className="text-fifa-gold">npm run seed:fixture</code> con los
               emuladores activos.
             </p>
@@ -369,14 +356,14 @@ export default function FixturePage() {
           <div className="space-y-10">
             {grouped.map(({ stage, label, dates }) => (
               <section key={stage}>
-                <h2 className="text-lg font-extrabold text-fifa-gold uppercase tracking-widest">
-                  ⚽ {label}
+                <h2 className="text-lg font-extrabold text-white uppercase tracking-wider">
+                  {label.toUpperCase()}
                 </h2>
                 <span className="fifa-gold-underline mb-4" />
                 <div className="space-y-6">
                   {dates.map(({ dateLabel, matches: dayMatches }) => (
                     <div key={`${stage}-${dateLabel}`}>
-                      <h3 className="text-sm font-semibold text-[#94A3B8] mb-3">
+                      <h3 className="text-sm font-semibold text-[#B8C5F0] mb-3">
                         {dateLabel}
                       </h3>
                       <div className="grid gap-4">

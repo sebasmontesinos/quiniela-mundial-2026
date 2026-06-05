@@ -1,19 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  --color-fifa-navy: #0A0E1A;
-  --color-fifa-dark-navy: #111827;
-  --color-fifa-card: #1C2333;
-  --color-fifa-gold: #F5A623;
+  --color-fifa-blue: #1B3FB5;
+  --color-fifa-blueDark: #0F2A8A;
+  --color-fifa-blueLight: #3E5FD9;
+  --color-fifa-gold: #FFB800;
   --color-fifa-red: #E63946;
-  --color-fifa-blue: #1D4ED8;
-  --color-fifa-border: #2D3748;
-  --color-fifa-text-secondary: #94A3B8;
-  --color-fifa-green: #10B981;
+  --color-fifa-green: #06B894;
+  --color-fifa-cardBg: #1A3399;
+  --color-fifa-cardBorder: #3E5FD9;
 }
 
 body {
-  background: linear-gradient(135deg, #0A0E1A 0%, #0F172A 50%, #1A1040 100%);
+  background: linear-gradient(180deg, #0F2A8A 0%, #1B3FB5 50%, #0F2A8A 100%);
   min-height: 100vh;
 }
 
@@ -66,36 +65,36 @@ body {
 }
 
 .fifa-card {
-  background-color: var(--color-fifa-card);
-  border: 1px solid var(--color-fifa-border);
+  background-color: var(--color-fifa-cardBg);
+  border: 1px solid var(--color-fifa-cardBorder);
   border-radius: 12px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
 }
 
 .fifa-gold-gradient {
-  background: linear-gradient(135deg, #F5A623, #EBB30D);
+  background: linear-gradient(135deg, #FFB800, #E6A000);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .fifa-gold-red-gradient {
-  background: linear-gradient(135deg, #F5A623, #E63946);
+  background: linear-gradient(135deg, #FFB800, #E63946);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .fifa-card-gold-left {
-  background-color: var(--color-fifa-card);
-  border: 1px solid var(--color-fifa-border);
+  background-color: var(--color-fifa-cardBg);
+  border: 1px solid var(--color-fifa-cardBorder);
   border-left: 3px solid var(--color-fifa-gold);
   border-radius: 12px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
 }
 
 .fifa-gold-underline {
-  background: linear-gradient(135deg, #F5A623, #EBB30D);
+  background: linear-gradient(135deg, #FFB800, #E6A000);
   height: 2px;
   width: 100%;
   display: block;

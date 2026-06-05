@@ -4,17 +4,12 @@ import { useAuth } from '../contexts/AuthContext';
 import { fetchAllMatches } from '../services/matches';
 import { fetchUserPredictions } from '../services/predictions';
 import { formatMatchDate, formatDate } from '../constants';
-import { getTeamFlag } from '../data/teamCrests';
+import { TeamFlag } from '../data/teamCrests.jsx';
 
 function TeamLabel({ teamName }) {
-  const flagUrl = getTeamFlag(teamName);
   return (
-    <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
-      {flagUrl ? (
-        <img src={flagUrl} alt="" width="20" height="15" style={{ borderRadius: '2px' }} />
-      ) : (
-        <span>🏳️</span>
-      )}
+    <span className="inline-flex items-center whitespace-nowrap">
+      <TeamFlag teamName={teamName} size={20} />
       <span>{teamName}</span>
     </span>
   );

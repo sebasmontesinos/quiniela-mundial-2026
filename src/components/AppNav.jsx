@@ -5,7 +5,7 @@ const linkClass = ({ isActive }) =>
   `px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
     isActive
       ? 'bg-fifa-gold/20 text-fifa-gold border border-fifa-gold/40'
-      : 'text-[#94A3B8] hover:text-white hover:bg-white/5'
+      : 'text-[#B8C5F0] hover:text-white hover:bg-white/10'
   }`;
 
 export default function AppNav() {
@@ -21,11 +21,12 @@ export default function AppNav() {
   const displayName = userProfile?.name || currentUser?.displayName || 'Usuario';
 
   return (
-    <nav className="bg-[#0A0E1A] border-b-2 border-fifa-gold/80 backdrop-blur-md sticky top-0 z-50">
+    <nav className="bg-[#0F2A8A] border-b-2 border-fifa-gold/80 sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="font-bold text-sm mr-3 fifa-gold-gradient text-lg hidden sm:inline tracking-wide">
-            ⚽ Mundial 2026
+          <span className="font-bold text-sm mr-3 text-lg hidden sm:inline tracking-wide flex items-center gap-1">
+            <span className="text-fifa-gold">Mundial 2026</span>
+            <span className="text-fifa-red text-2xl leading-none">•</span>
           </span>
           <NavLink to="/fixture" className={linkClass}>
             Fixture
@@ -42,7 +43,7 @@ export default function AppNav() {
         <div className="flex items-center gap-3">
           <NavLink
             to="/profile"
-            className="flex items-center gap-2 text-xs text-[#94A3B8] hover:text-fifa-gold transition-colors group"
+            className="flex items-center gap-2 text-xs text-[#B8C5F0] hover:text-fifa-gold transition-colors group"
           >
             {photoURL ? (
               <img
@@ -60,7 +61,7 @@ export default function AppNav() {
           <button
             type="button"
             onClick={handleLogout}
-            className="text-xs text-[#94A3B8] hover:text-[#F5A623] transition-colors"
+            className="text-xs text-[#B8C5F0] hover:text-[#FFB800] transition-colors"
           >
             Cerrar sesión
           </button>
