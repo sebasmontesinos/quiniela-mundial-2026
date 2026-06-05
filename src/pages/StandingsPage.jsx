@@ -30,7 +30,7 @@ function Avatar({ user }) {
   }
   const initial = (user.name || user.email || '?')[0].toUpperCase();
   return (
-    <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+    <div className="w-8 h-8 rounded-full bg-fifa-gold/20 flex items-center justify-center text-fifa-gold text-sm font-bold flex-shrink-0">
       {initial}
     </div>
   );
@@ -38,7 +38,7 @@ function Avatar({ user }) {
 
 function TrophyIcon() {
   return (
-    <svg className="w-5 h-5 text-amber-400 inline" viewBox="0 0 24 24" fill="currentColor">
+    <svg className="w-5 h-5 text-fifa-gold inline" viewBox="0 0 24 24" fill="currentColor">
       <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
     </svg>
   );
@@ -336,15 +336,15 @@ export default function StandingsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900">
+      <div className="min-h-screen bg-fifa-gradient">
         <AppNav />
         <div className="max-w-4xl mx-auto p-4 sm:p-6">
           <div className="mb-8">
-            <div className="h-8 w-48 bg-white/10 rounded animate-pulse mb-2" />
-            <div className="h-4 w-64 bg-white/10 rounded animate-pulse" />
+            <div className="h-8 w-48 bg-[#2D3748] rounded animate-pulse mb-2" />
+            <div className="h-4 w-64 bg-[#2D3748] rounded animate-pulse" />
           </div>
-          <div className="h-24 bg-white/5 border border-white/10 rounded-2xl mb-8 animate-pulse" />
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+          <div className="fifa-card mb-8 h-24 animate-pulse" />
+          <div className="fifa-card p-6">
             <TableSkeleton rows={5} />
           </div>
         </div>
@@ -353,34 +353,36 @@ export default function StandingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-slate-100">
+    <div className="min-h-screen bg-fifa-gradient text-[#F8FAFC]">
       <AppNav />
       <div className="max-w-4xl mx-auto p-4 sm:p-6 pb-16">
         <header className="mb-6">
-          <h1 className="text-3xl font-extrabold text-white">Posiciones</h1>
-          <p className="text-indigo-200 mt-1 text-sm">
+          <h1 className="text-3xl font-extrabold text-white flex items-center gap-3">
+            <span className="text-fifa-gold">🏆</span> Posiciones
+          </h1>
+          <p className="text-[#94A3B8] mt-1 text-sm">
             Tabla de posiciones del fixture de la oficina
           </p>
         </header>
 
-        <div className="bg-gradient-to-r from-amber-500/15 to-amber-600/10 border border-amber-500/30 rounded-xl p-5 mb-8">
+        <div className="bg-gradient-to-r from-fifa-gold/20 to-amber-600/10 border border-fifa-gold/30 fifa-card p-5 mb-8">
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
             <div className="flex items-center gap-2">
               <span className="text-2xl">💰</span>
               <div>
-                <p className="text-xs text-amber-300/80 uppercase tracking-wide">
+                <p className="text-xs text-fifa-gold/80 uppercase tracking-wide">
                   Pozo total
                 </p>
-                <p className="text-xl font-bold text-amber-300">
+                <p className="text-xl font-bold text-fifa-gold">
                   {totalPot} <span className="text-sm font-medium">Bs.</span>
                 </p>
               </div>
             </div>
-            <div className="w-px h-10 bg-amber-500/20 hidden sm:block" />
+            <div className="w-px h-10 bg-fifa-gold/20 hidden sm:block" />
             <div className="flex items-center gap-2">
               <span className="text-2xl">👥</span>
               <div>
-                <p className="text-xs text-amber-300/80 uppercase tracking-wide">
+                <p className="text-xs text-fifa-gold/80 uppercase tracking-wide">
                   Participantes
                 </p>
                 <p className="text-xl font-bold text-white">{participantsCount}</p>
@@ -388,16 +390,16 @@ export default function StandingsPage() {
             </div>
             {leader && (
               <>
-                <div className="w-px h-10 bg-amber-500/20 hidden sm:block" />
+                <div className="w-px h-10 bg-fifa-gold/20 hidden sm:block" />
                 <div className="flex items-center gap-2">
                   <span className="text-2xl">🏆</span>
                   <div>
-                    <p className="text-xs text-amber-300/80 uppercase tracking-wide">
+                    <p className="text-xs text-fifa-gold/80 uppercase tracking-wide">
                       Líder
                     </p>
                     <p className="text-base font-bold text-white">
                       {leader.name}{' '}
-                      <span className="text-amber-300">{leader.totalPoints}pts</span>
+                      <span className="text-fifa-gold">{leader.totalPoints}pts</span>
                     </p>
                   </div>
                 </div>
@@ -407,27 +409,30 @@ export default function StandingsPage() {
         </div>
 
         {!anyFinished && (
-          <div className="bg-amber-500/10 border border-amber-500/30 text-amber-200 px-4 py-3 rounded-lg text-sm mb-6">
+          <div className="bg-fifa-gold/10 border border-fifa-gold/30 text-fifa-gold px-4 py-3 rounded-lg text-sm mb-6">
             El torneo aún no comenzó. Las posiciones se actualizarán cuando
             terminen los partidos.
           </div>
         )}
 
         {standings.length === 0 && !currentUserFallback ? (
-          <div className="text-center py-12 bg-white/5 rounded-2xl border border-white/10 mb-8">
-            <p className="text-indigo-200">No hay participantes activos.</p>
+          <div className="fifa-card text-center py-12 mb-8">
+            <p className="text-[#94A3B8]">No hay participantes activos.</p>
           </div>
         ) : (
-          <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden mb-8">
+          <div className="fifa-card overflow-hidden mb-8">
             {topStandings.map((entry, index) => {
               const isCurrentUser = entry.uid === currentUser?.uid;
               const rank = index + 1;
+              const isFirst = rank === 1;
               return (
                 <div
                   key={entry.uid}
-                  className={`flex items-center gap-3 px-4 py-3 border-b border-white/5 transition-colors ${
-                    isCurrentUser
-                      ? 'bg-indigo-600/10'
+                  className={`flex items-center gap-3 px-4 py-3 border-b border-[#2D3748] transition-colors ${
+                    isFirst ? 'bg-fifa-gold/5 border-l-2 border-l-fifa-gold' : ''
+                  } ${
+                    isCurrentUser && !isFirst
+                      ? 'bg-fifa-gold/5'
                       : 'hover:bg-white/5'
                   }`}
                 >
@@ -437,15 +442,18 @@ export default function StandingsPage() {
                   <Avatar user={entry} />
                   <span
                     className={`flex-1 text-sm font-medium ${
-                      isCurrentUser ? 'text-indigo-200' : 'text-white'
+                      isCurrentUser ? 'text-fifa-gold' : 'text-white'
                     }`}
                   >
                     {entry.name}
                     {isCurrentUser && (
-                      <span className="ml-2 text-[10px] text-slate-400">(vos)</span>
+                      <span className="ml-2 text-[10px] text-[#94A3B8]">(vos)</span>
                     )}
                   </span>
-                  <span className="text-lg font-bold text-white">{entry.totalPoints}</span>
+                  <span className={`text-lg font-bold ${isFirst ? 'text-fifa-gold' : 'text-white'}`}>
+                    {entry.totalPoints}
+                    {isFirst && <span className="ml-1 text-fifa-gold">👑</span>}
+                  </span>
                 </div>
               );
             })}
@@ -453,22 +461,22 @@ export default function StandingsPage() {
             {!isInTop5 && (currentUserStanding || currentUserFallback) && (
               <>
                 <div className="flex items-center gap-2 px-4 py-2">
-                  <div className="flex-1 h-px bg-white/10" />
-                  <span className="text-slate-500 text-xs font-medium">...</span>
-                  <div className="flex-1 h-px bg-white/10" />
+                  <div className="flex-1 h-px bg-[#2D3748]" />
+                  <span className="text-[#94A3B8] text-xs font-medium">...</span>
+                  <div className="flex-1 h-px bg-[#2D3748]" />
                 </div>
-                <div className="flex items-center gap-3 px-4 py-3 border-b border-white/5 bg-indigo-600/10">
+                <div className="flex items-center gap-3 px-4 py-3 border-b border-[#2D3748] bg-fifa-gold/5">
                   <div className="w-8 text-center">
                     {currentUserStanding ? (
                       <RankMedal rank={standings.indexOf(currentUserStanding) + 1} />
                     ) : (
-                      <span className="text-slate-500 font-bold">—</span>
+                      <span className="text-[#94A3B8] font-bold">—</span>
                     )}
                   </div>
                   <Avatar user={currentUserStanding || currentUserFallback} />
-                  <span className="flex-1 text-sm font-medium text-indigo-200">
+                  <span className="flex-1 text-sm font-medium text-fifa-gold">
                     {(currentUserStanding || currentUserFallback).name}
-                    <span className="ml-2 text-[10px] text-slate-400">(vos)</span>
+                    <span className="ml-2 text-[10px] text-[#94A3B8]">(vos)</span>
                   </span>
                   <span className="text-lg font-bold text-white">
                     {(currentUserStanding || currentUserFallback).totalPoints}
@@ -480,7 +488,7 @@ export default function StandingsPage() {
             <button
               type="button"
               onClick={() => setShowFullStandings((v) => !v)}
-              className="w-full px-4 py-3 text-sm font-semibold text-indigo-300 hover:text-white hover:bg-white/5 transition-colors border-b border-white/5"
+              className="w-full px-4 py-3 text-sm font-semibold text-fifa-gold hover:text-white hover:bg-white/5 transition-colors border-b border-[#2D3748]"
             >
               {showFullStandings
                 ? '▲ Mostrar menos'
@@ -488,19 +496,19 @@ export default function StandingsPage() {
             </button>
 
             {showFullStandings && (
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto no-scrollbar">
                 <table className="w-full text-left text-sm">
                   <thead>
-                    <tr className="border-b border-white/10 bg-slate-900/50">
-                      <th className="px-4 py-3 font-semibold text-indigo-200 w-12">#</th>
-                      <th className="px-4 py-3 font-semibold text-indigo-200">Participante</th>
-                      <th className="px-4 py-3 font-semibold text-indigo-200 text-center">
+                    <tr className="border-b border-[#2D3748] bg-[#111827]">
+                      <th className="px-4 py-3 font-semibold text-fifa-gold w-12">#</th>
+                      <th className="px-4 py-3 font-semibold text-fifa-gold">Participante</th>
+                      <th className="px-4 py-3 font-semibold text-fifa-gold text-center">
                         Predicciones
                       </th>
-                      <th className="px-4 py-3 font-semibold text-indigo-200 text-center">
+                      <th className="px-4 py-3 font-semibold text-fifa-gold text-center">
                         Exactos
                       </th>
-                      <th className="px-4 py-3 font-semibold text-indigo-200 text-right">
+                      <th className="px-4 py-3 font-semibold text-fifa-gold text-right">
                         Puntos
                       </th>
                     </tr>
@@ -512,9 +520,9 @@ export default function StandingsPage() {
                       return (
                         <tr
                           key={entry.uid}
-                          className={`border-b border-white/5 transition-colors ${
+                          className={`border-b border-[#2D3748] transition-colors ${
                             isCurrentUser
-                              ? 'bg-indigo-600/10 hover:bg-indigo-600/15'
+                              ? 'bg-fifa-gold/5'
                               : 'hover:bg-white/5'
                           }`}
                         >
@@ -527,23 +535,23 @@ export default function StandingsPage() {
                               <div>
                                 <span
                                   className={`text-white font-medium ${
-                                    isCurrentUser ? 'text-indigo-200' : ''
+                                    isCurrentUser ? 'text-fifa-gold' : ''
                                   }`}
                                 >
                                   {entry.name}
                                 </span>
                                 {isCurrentUser && (
-                                  <span className="ml-2 text-[10px] text-slate-400">
+                                  <span className="ml-2 text-[10px] text-[#94A3B8]">
                                     (vos)
                                   </span>
                                 )}
                               </div>
                             </div>
                           </td>
-                          <td className="px-4 py-3 text-center text-indigo-200">
+                          <td className="px-4 py-3 text-center text-[#94A3B8]">
                             {entry.predictionsCount}
                           </td>
-                          <td className="px-4 py-3 text-center text-indigo-200">
+                          <td className="px-4 py-3 text-center text-[#94A3B8]">
                             {entry.exactScores}
                           </td>
                           <td className="px-4 py-3 text-right text-white font-bold text-lg">
@@ -559,27 +567,27 @@ export default function StandingsPage() {
           </div>
         )}
 
-        <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
-          <div className="px-4 py-4 border-b border-white/10">
+        <div className="fifa-card overflow-hidden">
+          <div className="px-4 py-4 border-b border-[#2D3748]">
             <h2 className="text-lg font-bold text-white">
               Predicciones por partido
             </h2>
-            <p className="text-xs text-indigo-200/70 mt-1">
+            <p className="text-xs text-[#94A3B8] mt-1">
               Revisá las predicciones de todos los participantes para partidos
               cerrados.
             </p>
           </div>
 
-          <div className="px-4 py-4 border-b border-white/10">
+          <div className="px-4 py-4 border-b border-[#2D3748]">
             {groupedMatches.length === 0 ? (
-              <p className="text-sm text-slate-400">
+              <p className="text-sm text-[#94A3B8]">
                 No hay partidos cerrados aún.
               </p>
             ) : (
               <select
                 value={selectedMatchId || ''}
                 onChange={(e) => setSelectedMatchId(e.target.value)}
-                className="w-full bg-slate-800 border border-white/20 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-indigo-500"
+                className="w-full bg-[#111827] border border-[#2D3748] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-fifa-gold"
               >
                 {groupedMatches.map(({ stage, label, matches: stageMatches }) => (
                   <optgroup key={stage} label={label}>
@@ -595,30 +603,30 @@ export default function StandingsPage() {
           </div>
 
           {matchDetail && (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto no-scrollbar">
               {auditRows.length === 0 ? (
                 <div className="text-center py-8">
-                  <p className="text-indigo-200 text-sm">
+                  <p className="text-[#94A3B8] text-sm">
                     No hay participantes activos.
                   </p>
                 </div>
               ) : (
                 <table className="w-full text-left text-sm">
                   <thead>
-                    <tr className="border-b border-white/10 bg-slate-900/50">
-                      <th className="px-4 py-3 font-semibold text-indigo-200">
+                    <tr className="border-b border-[#2D3748] bg-[#111827]">
+                      <th className="px-4 py-3 font-semibold text-fifa-gold">
                         Participante
                       </th>
-                      <th className="px-4 py-3 font-semibold text-indigo-200">
+                      <th className="px-4 py-3 font-semibold text-fifa-gold">
                         Predicción
                       </th>
-                      <th className="px-4 py-3 font-semibold text-indigo-200">
+                      <th className="px-4 py-3 font-semibold text-fifa-gold">
                         Pronosticado
                       </th>
-                      <th className="px-4 py-3 font-semibold text-indigo-200">
+                      <th className="px-4 py-3 font-semibold text-fifa-gold">
                         Resultado
                       </th>
-                      <th className="px-4 py-3 font-semibold text-indigo-200 text-right">
+                      <th className="px-4 py-3 font-semibold text-fifa-gold text-right">
                         Pts
                       </th>
                     </tr>
@@ -629,9 +637,9 @@ export default function StandingsPage() {
                       return (
                         <tr
                           key={row.user.uid}
-                          className={`border-b border-white/5 transition-colors ${
+                          className={`border-b border-[#2D3748] transition-colors ${
                             isCurrentUser
-                              ? 'bg-indigo-600/10'
+                              ? 'bg-fifa-gold/5'
                               : 'hover:bg-white/5'
                           }`}
                         >
@@ -640,12 +648,12 @@ export default function StandingsPage() {
                               <Avatar user={row.user} />
                               <span
                                 className={`text-sm font-medium ${
-                                  isCurrentUser ? 'text-indigo-200' : 'text-white'
+                                  isCurrentUser ? 'text-fifa-gold' : 'text-white'
                                 }`}
                               >
                                 {row.user.name}
                                 {isCurrentUser && (
-                                  <span className="ml-2 text-[10px] text-slate-400">
+                                  <span className="ml-2 text-[10px] text-[#94A3B8]">
                                     (vos)
                                   </span>
                                 )}
@@ -658,12 +666,12 @@ export default function StandingsPage() {
                                 {row.predictionText}
                               </span>
                             ) : (
-                              <span className="inline-block px-2 py-1 bg-slate-700/50 text-slate-300 text-xs rounded-full font-medium">
+                              <span className="inline-block px-2 py-1 bg-[#2D3748]/50 text-[#94A3B8] text-xs rounded-full font-medium">
                                 No predijo
                               </span>
                             )}
                           </td>
-                          <td className="px-4 py-3 text-xs text-slate-300">
+                          <td className="px-4 py-3 text-xs text-[#94A3B8]">
                             {row.didPredict
                               ? formatPredictionDate(row.predictedAt)
                               : '—'}
@@ -673,18 +681,18 @@ export default function StandingsPage() {
                               <span
                                 className={`text-xs font-semibold ${
                                   row.result?.icon === '✅'
-                                    ? 'text-emerald-300'
+                                    ? 'text-[#10B981]'
                                     : row.result?.icon === '🎯'
-                                    ? 'text-amber-300'
+                                    ? 'text-fifa-gold'
                                     : row.result?.icon === '❌'
-                                    ? 'text-rose-300'
-                                    : 'text-slate-400'
+                                    ? 'text-fifa-red'
+                                    : 'text-[#94A3B8]'
                                 }`}
                               >
                                 {row.result?.icon} {row.result?.text}
                               </span>
                             ) : (
-                              <span className="text-xs text-slate-500">—</span>
+                              <span className="text-xs text-[#94A3B8]">—</span>
                             )}
                           </td>
                           <td className="px-4 py-3 text-right text-sm font-bold text-white">
@@ -700,7 +708,7 @@ export default function StandingsPage() {
           )}
 
           {matchDetail && auditRows.length > 0 && (
-            <div className="px-4 py-4 border-t border-white/10">
+            <div className="px-4 py-4 border-t border-[#2D3748]">
               <a
                 href={`https://wa.me/?text=${generateWhatsAppText(
                   matchDetail,
@@ -710,7 +718,7 @@ export default function StandingsPage() {
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold rounded-lg transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-fifa-gold hover:bg-amber-400 text-[#0A0E1A] text-sm font-semibold rounded-lg transition-colors"
               >
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />

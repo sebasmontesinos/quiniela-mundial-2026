@@ -4,8 +4,8 @@ import { useAuth } from '../contexts/AuthContext';
 const linkClass = ({ isActive }) =>
   `px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
     isActive
-      ? 'bg-indigo-600 text-white'
-      : 'text-indigo-200 hover:bg-white/10 hover:text-white'
+      ? 'bg-fifa-gold/20 text-fifa-gold border border-fifa-gold/40'
+      : 'text-[#94A3B8] hover:text-white hover:bg-white/5'
   }`;
 
 export default function AppNav() {
@@ -18,11 +18,11 @@ export default function AppNav() {
   };
 
   return (
-    <nav className="bg-slate-900/80 border-b border-white/10 backdrop-blur-md sticky top-0 z-50">
+    <nav className="bg-[#0A0E1A] border-b-2 border-fifa-gold/80 backdrop-blur-md sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-white font-bold text-sm mr-2 hidden sm:inline">
-            Mundial 2026
+          <span className="font-bold text-sm mr-3 fifa-gold-gradient text-lg hidden sm:inline tracking-wide">
+            ⚽ Mundial 2026
           </span>
           <NavLink to="/fixture" className={linkClass}>
             Fixture
@@ -39,7 +39,7 @@ export default function AppNav() {
         <button
           type="button"
           onClick={handleLogout}
-          className="text-xs text-slate-400 hover:text-white transition-colors"
+          className="text-xs text-[#94A3B8] hover:text-[#F5A623] transition-colors"
         >
           Cerrar sesión
         </button>

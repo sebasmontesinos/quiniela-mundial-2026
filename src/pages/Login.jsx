@@ -33,22 +33,24 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 p-4">
-      <div className="w-full max-w-md bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl shadow-2xl p-8 transition-all duration-300 hover:shadow-indigo-500/10">
+    <div className="min-h-screen flex items-center justify-center bg-fifa-gradient p-4">
+      <div className="w-full max-w-md fifa-card p-8">
         
-        {/* Encabezado */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-tr from-amber-400 to-rose-500 mb-4 shadow-lg shadow-amber-500/20">
-            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-            </svg>
+          <div className="text-5xl mb-4">🏆</div>
+          <h1 className="text-4xl font-extrabold fifa-gold-gradient tracking-tight leading-tight">
+            Mundial 2026
+          </h1>
+          <p className="text-white mt-3 font-medium text-lg">Fixture de la Oficina</p>
+          <div className="mt-4 flex justify-center gap-2 text-2xl">
+            <span>⚽</span>
+            <span>🌍</span>
+            <span>⚽</span>
           </div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight">Mundial 2026</h1>
-          <p className="text-indigo-200 mt-2 font-medium">Fixture de la Oficina</p>
         </div>
 
         {displayError && (
-          <div className="bg-rose-500/20 border border-rose-500/50 text-rose-200 px-4 py-3 rounded-lg text-sm mb-6 flex items-center gap-2">
+          <div className="bg-fifa-red/20 border border-fifa-red/50 text-fifa-red px-4 py-3 rounded-lg text-sm mb-6 flex items-center gap-2">
             <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
             </svg>
@@ -57,11 +59,11 @@ export default function Login() {
         )}
 
         <div className="space-y-6">
-          <p className="text-slate-300 text-center text-sm">
+          <p className="text-[#94A3B8] text-center text-sm">
             Iniciá sesión con tu cuenta de Google para participar en el fixture de la oficina.
           </p>
           {usingAuthEmulator && (
-            <p className="text-indigo-300/70 text-center text-xs">
+            <p className="text-fifa-gold/70 text-center text-xs">
               En modo local serás redirigido al emulador de Auth para elegir una cuenta de prueba.
             </p>
           )}
@@ -70,10 +72,10 @@ export default function Login() {
             id="btn-google-login"
             onClick={handleLogin}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-3 bg-white hover:bg-slate-50 text-slate-800 font-semibold px-6 py-3.5 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed group"
+            className="w-full flex items-center justify-center gap-3 bg-white hover:bg-slate-100 text-[#0A0E1A] font-semibold px-6 py-3.5 rounded-xl transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed group"
           >
             {loading ? (
-              <svg className="animate-spin h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24">
+              <svg className="animate-spin h-5 w-5 text-fifa-gold" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
               </svg>
@@ -92,11 +94,11 @@ export default function Login() {
         </div>
 
         {import.meta.env.DEV && (
-          <div className="mt-8 pt-6 border-t border-white/10 text-center space-y-1">
-            <p className="text-xs text-indigo-300/60">
-              Entrá siempre en <span className="text-indigo-200 font-medium">http://localhost:5173</span>
+          <div className="mt-8 pt-6 border-t border-[#2D3748] text-center space-y-1">
+            <p className="text-xs text-[#94A3B8]/60">
+              Entrá siempre en <span className="text-fifa-gold font-medium">http://localhost:5173</span>
             </p>
-            <p className="text-[11px] text-indigo-300/40">
+            <p className="text-[11px] text-[#94A3B8]/40">
               El puerto 4000 es solo la consola técnica de Firebase (admin/dev), no es la app.
             </p>
           </div>

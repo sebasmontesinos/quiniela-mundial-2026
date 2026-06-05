@@ -1,5 +1,22 @@
 @import "tailwindcss";
 
+:root {
+  --color-fifa-navy: #0A0E1A;
+  --color-fifa-dark-navy: #111827;
+  --color-fifa-card: #1C2333;
+  --color-fifa-gold: #F5A623;
+  --color-fifa-red: #E63946;
+  --color-fifa-blue: #1D4ED8;
+  --color-fifa-border: #2D3748;
+  --color-fifa-text-secondary: #94A3B8;
+  --color-fifa-green: #10B981;
+}
+
+body {
+  background: linear-gradient(135deg, #0A0E1A 0%, #0F172A 50%, #1A1040 100%);
+  min-height: 100vh;
+}
+
 @keyframes slide-up {
   from {
     opacity: 0;
@@ -11,6 +28,51 @@
   }
 }
 
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(230, 57, 70, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(230, 57, 70, 0.6);
+  }
+}
+
+@keyframes live-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
 .animate-slide-up {
   animation: slide-up 0.3s ease-out;
+}
+
+.animate-live-pulse {
+  animation: live-pulse 1.5s ease-in-out infinite;
+}
+
+.fifa-card {
+  background-color: var(--color-fifa-card);
+  border: 1px solid var(--color-fifa-border);
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
+}
+
+.fifa-gold-gradient {
+  background: linear-gradient(135deg, #F5A623, #EBB30D);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Hide scrollbar for tables on mobile */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

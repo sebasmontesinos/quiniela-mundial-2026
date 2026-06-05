@@ -13,9 +13,9 @@ import { formatDate } from '../constants';
 
 function StatusBadge({ status }) {
   const styles = {
-    pending: 'bg-amber-500/20 text-amber-200 border-amber-500/40',
-    active: 'bg-emerald-500/20 text-emerald-200 border-emerald-500/40',
-    blocked: 'bg-rose-500/20 text-rose-200 border-rose-500/40',
+    pending: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
+    active: 'bg-[#10B981]/20 text-[#10B981] border-[#10B981]/40',
+    blocked: 'bg-fifa-red/20 text-fifa-red border-fifa-red/40',
   };
   const labels = {
     pending: 'Pendiente',
@@ -25,7 +25,7 @@ function StatusBadge({ status }) {
 
   return (
     <span
-      className={`inline-block text-xs font-semibold px-2.5 py-1 rounded-full border ${styles[status] || 'bg-slate-500/20 text-slate-200'}`}
+      className={`inline-block text-xs font-semibold px-2.5 py-1 rounded-full border ${styles[status] || 'bg-[#2D3748]/50 text-[#94A3B8]'}`}
     >
       {labels[status] || status}
     </span>
@@ -87,8 +87,10 @@ export default function AdminPanel() {
 
   if (!isAdmin) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-900 text-white p-6">
-        <p>No tenés permisos para acceder al panel de administración.</p>
+      <div className="min-h-screen flex items-center justify-center bg-fifa-gradient text-white p-6">
+        <div className="fifa-card p-8 text-center">
+          <p className="text-[#94A3B8]">No tenés permisos para acceder al panel de administración.</p>
+        </div>
       </div>
     );
   }
@@ -101,17 +103,19 @@ export default function AdminPanel() {
   const tabClass = (id) =>
     `px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
       tab === id
-        ? 'bg-indigo-600 text-white'
-        : 'text-indigo-200 hover:bg-white/10'
+        ? 'bg-fifa-gold/20 text-fifa-gold border border-fifa-gold/40'
+        : 'text-[#94A3B8] hover:text-white hover:bg-white/5 border border-transparent'
     }`;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-slate-100">
+    <div className="min-h-screen bg-fifa-gradient text-[#F8FAFC]">
       <AppNav />
       <div className="max-w-6xl mx-auto p-4 sm:p-6">
         <div className="mb-6">
-          <h1 className="text-3xl font-extrabold text-white">Panel de administración</h1>
-          <p className="text-indigo-200 mt-1 text-sm">Usuarios y resultados de partidos</p>
+          <h1 className="text-3xl font-extrabold text-white flex items-center gap-3">
+            <span className="text-fifa-gold">⚙️</span> Panel de administración
+          </h1>
+          <p className="text-[#94A3B8] mt-1 text-sm">Usuarios y resultados de partidos</p>
         </div>
 
         <div className="flex gap-2 mb-6">
@@ -127,7 +131,7 @@ export default function AdminPanel() {
         </div>
 
         {error && (
-          <div className="bg-rose-500/20 border border-rose-500/50 text-rose-200 px-4 py-3 rounded-lg text-sm mb-6">
+          <div className="bg-fifa-red/20 border border-fifa-red/50 text-fifa-red px-4 py-3 rounded-lg text-sm mb-6">
             {error}
           </div>
         )}
@@ -135,42 +139,42 @@ export default function AdminPanel() {
         {tab === 'users' && (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-              <div className="bg-white/10 border border-white/20 rounded-xl p-5">
-                <p className="text-indigo-300 text-sm uppercase tracking-wide">
+              <div className="fifa-card p-5">
+                <p className="text-fifa-gold text-sm uppercase tracking-wide">
                   Jugadores registrados
                 </p>
                 <p className="text-3xl font-bold text-white mt-1">{totalUsers}</p>
               </div>
-              <div className="bg-white/10 border border-white/20 rounded-xl p-5">
-                <p className="text-indigo-300 text-sm uppercase tracking-wide">Usuarios activos</p>
-                <p className="text-3xl font-bold text-emerald-300 mt-1">{activeUsers}</p>
+              <div className="fifa-card p-5">
+                <p className="text-fifa-gold text-sm uppercase tracking-wide">Usuarios activos</p>
+                <p className="text-3xl font-bold text-[#10B981] mt-1">{activeUsers}</p>
               </div>
-              <div className="bg-white/10 border border-white/20 rounded-xl p-5">
-                <p className="text-indigo-300 text-sm uppercase tracking-wide">Pozo total</p>
-                <p className="text-3xl font-bold text-amber-300 mt-1">
+              <div className="fifa-card p-5">
+                <p className="text-fifa-gold text-sm uppercase tracking-wide">Pozo total</p>
+                <p className="text-3xl font-bold text-fifa-gold mt-1">
                   {totalPot} <span className="text-lg font-medium">Bs.</span>
                 </p>
-                <p className="text-xs text-indigo-300/70 mt-1">
+                <p className="text-xs text-[#94A3B8] mt-1">
                   {activeUsers} × {ENTRY_FEE_BS} Bs.
                 </p>
               </div>
             </div>
 
-            <div className="bg-white/10 border border-white/20 rounded-2xl overflow-hidden">
+            <div className="fifa-card overflow-hidden">
               {loading ? (
-                <p className="p-8 text-center text-indigo-200">Cargando usuarios...</p>
+                <p className="p-8 text-center text-[#94A3B8]">Cargando usuarios...</p>
               ) : users.length === 0 ? (
-                <p className="p-8 text-center text-indigo-200">No hay usuarios registrados.</p>
+                <p className="p-8 text-center text-[#94A3B8]">No hay usuarios registrados.</p>
               ) : (
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto no-scrollbar">
                   <table className="w-full text-left text-sm">
                     <thead>
-                      <tr className="border-b border-white/10 bg-slate-900/50">
-                        <th className="px-4 py-3 font-semibold text-indigo-200">Nombre</th>
-                        <th className="px-4 py-3 font-semibold text-indigo-200">Email</th>
-                        <th className="px-4 py-3 font-semibold text-indigo-200">Estado</th>
-                        <th className="px-4 py-3 font-semibold text-indigo-200">Registro</th>
-                        <th className="px-4 py-3 font-semibold text-indigo-200">Acciones</th>
+                      <tr className="border-b border-[#2D3748] bg-[#111827]">
+                        <th className="px-4 py-3 font-semibold text-fifa-gold">Nombre</th>
+                        <th className="px-4 py-3 font-semibold text-fifa-gold">Email</th>
+                        <th className="px-4 py-3 font-semibold text-fifa-gold">Estado</th>
+                        <th className="px-4 py-3 font-semibold text-fifa-gold">Registro</th>
+                        <th className="px-4 py-3 font-semibold text-fifa-gold">Acciones</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -182,37 +186,37 @@ export default function AdminPanel() {
                         return (
                           <tr
                             key={user.uid}
-                            className="border-b border-white/5 hover:bg-white/5 transition-colors"
+                            className="border-b border-[#2D3748] hover:bg-white/5 transition-colors"
                           >
                             <td className="px-4 py-3 text-white">
                               {user.name || '—'}
                               {isAdminUser && (
-                                <span className="ml-2 text-[10px] uppercase bg-indigo-500/30 text-indigo-200 px-1.5 py-0.5 rounded">
+                                <span className="ml-2 text-[10px] uppercase bg-fifa-gold/20 text-fifa-gold px-1.5 py-0.5 rounded">
                                   Administrador
                                 </span>
                               )}
                               {isSelf && (
-                                <span className="ml-2 text-[10px] uppercase text-slate-400">
+                                <span className="ml-2 text-[10px] uppercase text-[#94A3B8]">
                                   (vos)
                                 </span>
                               )}
                             </td>
-                            <td className="px-4 py-3 text-indigo-200">{user.email || '—'}</td>
+                            <td className="px-4 py-3 text-[#94A3B8]">{user.email || '—'}</td>
                             <td className="px-4 py-3">
                               {isAdminUser ? (
-                                <span className="inline-block text-xs font-semibold px-2.5 py-1 rounded-full border bg-indigo-500/20 text-indigo-200 border-indigo-500/40">
+                                <span className="inline-block text-xs font-semibold px-2.5 py-1 rounded-full border bg-fifa-gold/20 text-fifa-gold border-fifa-gold/40">
                                   Administrador
                                 </span>
                               ) : (
                                 <StatusBadge status={user.status} />
                               )}
                             </td>
-                            <td className="px-4 py-3 text-indigo-200">
+                            <td className="px-4 py-3 text-[#94A3B8]">
                               {formatDate(user.createdAt)}
                             </td>
                             <td className="px-4 py-3">
                               {isAdminUser ? (
-                                <span className="text-xs text-slate-500">—</span>
+                                <span className="text-xs text-[#94A3B8]">—</span>
                               ) : (
                                 <div className="flex flex-wrap gap-2">
                                   <button
@@ -221,7 +225,7 @@ export default function AdminPanel() {
                                       isSelf || user.status === 'active' || isUpdating
                                     }
                                     onClick={() => handleStatusChange(user.uid, 'active')}
-                                    className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white disabled:opacity-40 disabled:cursor-not-allowed"
+                                    className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#10B981] hover:bg-emerald-500 text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                                   >
                                     Activar
                                   </button>
@@ -231,7 +235,7 @@ export default function AdminPanel() {
                                       isSelf || user.status === 'blocked' || isUpdating
                                     }
                                     onClick={() => handleStatusChange(user.uid, 'blocked')}
-                                    className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-600 hover:bg-rose-500 text-white disabled:opacity-40 disabled:cursor-not-allowed"
+                                    className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-fifa-red hover:bg-red-500 text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                                   >
                                     Suspender
                                   </button>
@@ -250,13 +254,13 @@ export default function AdminPanel() {
         )}
 
         {tab === 'matches' && (
-          <div className="bg-white/10 border border-white/20 rounded-2xl overflow-hidden">
+          <div className="fifa-card overflow-hidden">
             <AdminMatchesTab />
           </div>
         )}
 
         {tab === 'simulation' && (
-          <div className="bg-white/10 border border-white/20 rounded-2xl overflow-hidden p-6">
+          <div className="fifa-card overflow-hidden p-6">
             <SimulationTab />
           </div>
         )}
