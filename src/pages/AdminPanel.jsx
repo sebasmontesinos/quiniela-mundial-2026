@@ -255,6 +255,12 @@ export default function AdminPanel() {
 
         {tab === 'matches' && (
           <div className="fifa-card overflow-hidden">
+            <div className="px-4 py-3 border-b border-[#2D3748] bg-[#111827]/50">
+              <p className="text-xs text-[#94A3B8]">
+                Results are updated automatically via API every 5 minutes.
+                Use this only as a manual override if needed.
+              </p>
+            </div>
             <AdminMatchesTab />
           </div>
         )}

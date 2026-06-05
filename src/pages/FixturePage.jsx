@@ -18,11 +18,19 @@ import { CardSkeleton } from '../components/Skeleton';
 import { getTeamFlag } from '../data/teamCrests';
 
 function TeamLogo({ teamName }) {
-  return (
-    <span className="inline-block text-[28px] leading-none mr-2" role="img" aria-label={teamName}>
-      {getTeamFlag(teamName)}
-    </span>
-  );
+  const flagUrl = getTeamFlag(teamName);
+  if (flagUrl) {
+    return (
+      <img
+        src={flagUrl}
+        alt={teamName}
+        width="32"
+        height="24"
+        style={{ borderRadius: '3px', marginRight: '8px', verticalAlign: 'middle' }}
+      />
+    );
+  }
+  return <span style={{ marginRight: '8px' }}>🏳️</span>;
 }
 
 function MatchStatusBadge({ match, locked }) {
