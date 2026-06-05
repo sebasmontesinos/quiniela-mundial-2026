@@ -173,7 +173,7 @@ export default function SimulationTab() {
   const selectedMatch = matches.find((m) => m.id === selectedMatchId);
 
   if (initialized === null) {
-    return <p className="p-8 text-center text-indigo-200">Loading simulation data...</p>;
+    return <p className="p-8 text-center text-[#94A3B8]">Cargando datos de simulación...</p>;
   }
 
   return (
@@ -182,8 +182,8 @@ export default function SimulationTab() {
         <div
           className={`px-4 py-3 rounded-lg text-sm ${
             message.type === 'success'
-              ? 'bg-emerald-500/20 border border-emerald-500/50 text-emerald-200'
-              : 'bg-rose-500/20 border border-rose-500/50 text-rose-200'
+              ? 'bg-[#10B981]/20 border border-[#10B981]/40 text-[#10B981]'
+              : 'bg-fifa-red/20 border border-fifa-red/50 text-fifa-red'
           }`}
         >
           {message.text}
@@ -191,22 +191,33 @@ export default function SimulationTab() {
       )}
 
       {/* Toggle */}
-      <div className="bg-white/10 border border-white/20 rounded-xl p-5">
+      <div className="fifa-card p-5">
         <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-white font-semibold">Simulation mode</h3>
-            <p className="text-indigo-200 text-sm mt-1">
-              {simulationMode
-                ? 'Active — all users see simulated data'
-                : 'Inactive — users see real data'}
-            </p>
+          <div className="flex items-center gap-3">
+            {simulationMode && (
+              <span className="w-3 h-3 rounded-full bg-fifa-gold animate-live-pulse flex-shrink-0" />
+            )}
+            <div>
+              <h3
+                className={`font-bold text-sm uppercase tracking-wider ${
+                  simulationMode ? 'text-fifa-gold' : 'text-[#94A3B8]'
+                }`}
+              >
+                {simulationMode ? '⚡ SIMULACIÓN ACTIVA' : 'SIMULACIÓN APAGADA'}
+              </h3>
+              <p className="text-xs text-[#94A3B8] mt-1">
+                {simulationMode
+                  ? 'Los usuarios ven datos simulados'
+                  : 'Los usuarios ven datos reales'}
+              </p>
+            </div>
           </div>
           <button
             type="button"
             disabled={busy}
             onClick={handleToggle}
             className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus:outline-none ${
-              simulationMode ? 'bg-amber-500' : 'bg-slate-600'
+              simulationMode ? 'bg-fifa-gold' : 'bg-[#374151]'
             }`}
           >
             <span
@@ -220,29 +231,46 @@ export default function SimulationTab() {
 
       {/* Initialize */}
       {!initialized && (
-        <div className="bg-white/10 border border-white/20 rounded-xl p-5 text-center">
-          <p className="text-indigo-200 text-sm mb-4">
-            Simulation collections are empty. Copy the current match and prediction data to get started.
+        <div className="fifa-card p-6 text-center">
+          <p className="text-[#94A3B8] text-sm mb-2">
+            Las colecciones de simulación están vacías.
+          </p>
+          <p className="text-[#94A3B8] text-xs mb-5">
+            Copiá los partidos y predicciones actuales para comenzar.
           </p>
           <button
             type="button"
             disabled={busy}
             onClick={handleInitialize}
-            className="px-6 py-2.5 rounded-lg text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white disabled:opacity-50 transition-colors"
+            className="px-6 py-3 rounded-lg text-sm font-bold bg-fifa-gold text-[#0A0E1A] hover:bg-amber-400 disabled:opacity-50 transition-colors"
           >
-            {busy ? 'Initializing...' : 'Initialize simulation'}
+            {busy ? 'Inicializando...' : '🚀 Initialize simulation'}
           </button>
+          {busy && !initialized && (
+            <p className="text-xs text-[#94A3B8] mt-3 animate-live-pulse">
+              Copiando datos...
+            </p>
+          )}
+        </div>
+      )}
+
+      {initialized && (
+        <div className="text-center mb-2">
+          <span className="inline-block text-xs font-semibold px-3 py-1 rounded-full bg-[#10B981]/20 text-[#10B981] border border-[#10B981]/40">
+            ✅ Simulación inicializada
+          </span>
         </div>
       )}
 
       {/* Apply results */}
       {initialized && (
-        <div className="bg-white/10 border border-white/20 rounded-xl p-5">
-          <h3 className="text-white font-semibold mb-4">Apply simulation result</h3>
+        <div className="fifa-card p-5">
+          <h3 className="text-white font-bold text-sm uppercase tracking-wider mb-4">
+            Apply simulation result
+          </h3>
 
-          {/* Match selector */}
           <div className="mb-4">
-            <label className="block text-xs text-indigo-300 uppercase tracking-wide font-medium mb-2">
+            <label className="block text-xs text-fifa-gold uppercase tracking-wide font-medium mb-2">
               Select match
             </label>
             <select
@@ -252,9 +280,9 @@ export default function SimulationTab() {
                 setHomeScore('');
                 setAwayScore('');
               }}
-              className="w-full bg-slate-900/60 border border-white/20 rounded-lg px-3 py-2.5 text-white text-sm"
+              className="w-full bg-[#111827] border border-[#2D3748] rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-fifa-gold"
             >
-              <option value="" className="text-slate-400">
+              <option value="" className="text-[#94A3B8]">
                 — Choose a match —
               </option>
               {grouped.map(({ stage, label, matches: stageMatches }) => (
@@ -269,11 +297,10 @@ export default function SimulationTab() {
             </select>
           </div>
 
-          {/* Score inputs */}
           {selectedMatch && (
             <div className="flex items-end gap-4 mb-4 flex-wrap">
               <div>
-                <label className="block text-xs text-indigo-300 uppercase tracking-wide font-medium mb-2">
+                <label className="block text-xs text-[#94A3B8] uppercase tracking-wide font-medium mb-2">
                   {selectedMatch.homeTeam}
                 </label>
                 <input
@@ -281,12 +308,12 @@ export default function SimulationTab() {
                   min="0"
                   value={homeScore}
                   onChange={(e) => setHomeScore(e.target.value)}
-                  className="w-20 bg-slate-900/60 border border-white/20 rounded-lg px-3 py-2.5 text-white text-center"
+                  className="w-20 bg-[#111827] border border-[#2D3748] rounded-lg px-3 py-2.5 text-white text-center focus:outline-none focus:border-fifa-gold"
                 />
               </div>
-              <span className="text-slate-500 font-bold pb-2.5">—</span>
+              <span className="text-[#94A3B8] font-bold pb-2.5">—</span>
               <div>
-                <label className="block text-xs text-indigo-300 uppercase tracking-wide font-medium mb-2">
+                <label className="block text-xs text-[#94A3B8] uppercase tracking-wide font-medium mb-2">
                   {selectedMatch.awayTeam}
                 </label>
                 <input
@@ -294,14 +321,14 @@ export default function SimulationTab() {
                   min="0"
                   value={awayScore}
                   onChange={(e) => setAwayScore(e.target.value)}
-                  className="w-20 bg-slate-900/60 border border-white/20 rounded-lg px-3 py-2.5 text-white text-center"
+                  className="w-20 bg-[#111827] border border-[#2D3748] rounded-lg px-3 py-2.5 text-white text-center focus:outline-none focus:border-fifa-gold"
                 />
               </div>
               <button
                 type="button"
                 disabled={busy}
                 onClick={handleApplyResult}
-                className="px-5 py-2.5 rounded-lg text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white disabled:opacity-50 transition-colors"
+                className="px-5 py-2.5 rounded-lg text-sm font-bold bg-fifa-gold text-[#0A0E1A] hover:bg-amber-400 disabled:opacity-50 transition-colors"
               >
                 {busy ? 'Applying...' : 'Apply result'}
               </button>
@@ -309,18 +336,20 @@ export default function SimulationTab() {
           )}
 
           {!selectedMatch && selectedMatchId && (
-            <p className="text-xs text-rose-300">Match not found in simulation data.</p>
+            <p className="text-xs text-fifa-red">Match not found in simulation data.</p>
           )}
         </div>
       )}
 
       {/* Reset */}
       {initialized && (
-        <div className="bg-white/10 border border-rose-500/30 rounded-xl p-5">
+        <div className="fifa-card border border-fifa-red/30 p-5">
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
-              <h3 className="text-white font-semibold">Reset simulation</h3>
-              <p className="text-indigo-200 text-sm mt-1">
+              <h3 className="text-white font-bold text-sm uppercase tracking-wider">
+                Reset simulation
+              </h3>
+              <p className="text-[#94A3B8] text-xs mt-1">
                 Clear all simulated results and turn off simulation mode
               </p>
             </div>
@@ -328,7 +357,7 @@ export default function SimulationTab() {
               type="button"
               disabled={busy}
               onClick={handleReset}
-              className="px-5 py-2.5 rounded-lg text-sm font-semibold bg-rose-600 hover:bg-rose-500 text-white disabled:opacity-50 transition-colors"
+              className="px-5 py-2.5 rounded-lg text-sm font-semibold bg-fifa-red hover:bg-red-500 text-white disabled:opacity-50 transition-colors"
             >
               {busy ? 'Resetting...' : 'Reset simulation'}
             </button>

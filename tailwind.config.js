@@ -22,6 +22,7 @@ export default {
       backgroundImage: {
         'fifa-gradient': 'linear-gradient(135deg, #0A0E1A 0%, #0F172A 50%, #1A1040 100%)',
         'fifa-gold': 'linear-gradient(135deg, #F5A623, #EBB30D)',
+        'fifa-gold-red': 'linear-gradient(135deg, #F5A623, #E63946)',
       },
     },
   },

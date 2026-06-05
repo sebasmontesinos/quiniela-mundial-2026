@@ -19,19 +19,17 @@ import Countdown from '../components/Countdown';
 import { getTeamFlag } from '../data/teamCrests';
 
 function TeamLogo({ teamName }) {
-  const flagUrl = getTeamFlag(teamName);
-  if (flagUrl) {
-    return (
-      <img
-        src={flagUrl}
-        alt={teamName}
-        width="32"
-        height="24"
-        style={{ borderRadius: '3px', marginRight: '8px', verticalAlign: 'middle' }}
-      />
-    );
-  }
-  return <span style={{ marginRight: '8px' }}>🏳️</span>;
+  return (
+    <span
+      style={{
+        fontSize: '24px',
+        marginRight: '6px',
+        fontFamily: 'Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif',
+      }}
+    >
+      {getTeamFlag(teamName)}
+    </span>
+  );
 }
 
 function MatchStatusBadge({ match, locked }) {
@@ -44,7 +42,7 @@ function MatchStatusBadge({ match, locked }) {
   }
   if (match.status === 'live') {
     return (
-      <span className="text-xs font-semibold px-3 py-1 rounded-full bg-fifa-red/20 text-fifa-red border border-fifa-red/40 animate-live-pulse">
+      <span className="text-xs font-semibold px-3 py-1 rounded-[20px] bg-fifa-red text-white border border-fifa-red animate-live-pulse">
         ● En vivo
       </span>
     );
@@ -57,7 +55,7 @@ function MatchStatusBadge({ match, locked }) {
     );
   }
   return (
-    <span className="text-xs font-semibold px-3 py-1 rounded-full bg-fifa-gold/20 text-fifa-gold border border-fifa-gold/30">
+    <span className="text-xs font-semibold px-3 py-1 rounded-[20px] bg-fifa-gold text-[#0A0E1A] border border-fifa-gold/60">
       Próximo
     </span>
   );
@@ -135,7 +133,7 @@ function PredictionForm({ match, prediction, userId, onSaved, simulationMode }) 
         <button
           type="submit"
           disabled={saving}
-          className="mt-4 bg-fifa-gold hover:bg-amber-400 text-[#0A0E1A] text-sm font-semibold px-5 py-2 rounded-lg disabled:opacity-50 transition-colors"
+          className="mt-4 bg-fifa-gold hover:bg-amber-400 text-[#0A0E1A] text-sm font-bold px-5 py-2 rounded-[8px] disabled:opacity-50 transition-all shadow-lg shadow-fifa-gold/20"
         >
           {saving ? 'Guardando...' : prediction ? 'Actualizar' : 'Enviar'}
         </button>
@@ -152,15 +150,15 @@ function MatchCard({ match, prediction, userId, onPredictionSaved, simulationMod
   const showResult = match.status === 'finished' && match.homeScore != null;
 
   return (
-    <div className="fifa-card p-4 hover:border-fifa-gold/30 transition-colors">
+    <div className="fifa-card-gold-left p-4 hover:border-fifa-gold/60 transition-all">
       <div className="flex flex-wrap items-start justify-between gap-2 mb-3">
         <div>
           {match.group && (
             <span className="text-[10px] uppercase text-fifa-gold font-bold tracking-wider">
-              Grupo {match.group}
+              GRUPO {match.group}
             </span>
           )}
-          <p className="text-xl font-bold text-white mt-1 flex items-center flex-wrap">
+          <p className="text-xl text-white mt-1 flex items-center flex-wrap" style={{ fontSize: '1.2rem', fontWeight: 600 }}>
             <span className="flex items-center whitespace-nowrap">
               <TeamLogo teamName={match.homeTeam} />
               {match.homeTeam}
@@ -331,8 +329,8 @@ export default function FixturePage() {
         )}
 
         <header className="mb-8">
-          <h1 className="text-3xl font-extrabold text-white flex items-center gap-3">
-            <span className="text-fifa-gold">📅</span> Fixture Mundial 2026
+          <h1 className="text-4xl font-extrabold fifa-gold-gradient flex items-center gap-3">
+            📅 Fixture Mundial 2026
           </h1>
           <p className="text-[#94A3B8] mt-1 text-sm">
             Cargá tus resultados antes de que arranque cada partido. 3 pts plenos, 1 pt por
@@ -371,9 +369,10 @@ export default function FixturePage() {
           <div className="space-y-10">
             {grouped.map(({ stage, label, dates }) => (
               <section key={stage}>
-                <h2 className="text-lg font-extrabold text-fifa-gold mb-4 pb-2 border-b border-[#2D3748] uppercase tracking-widest">
-                  {label}
+                <h2 className="text-lg font-extrabold text-fifa-gold uppercase tracking-widest">
+                  ⚽ {label}
                 </h2>
+                <span className="fifa-gold-underline mb-4" />
                 <div className="space-y-6">
                   {dates.map(({ dateLabel, matches: dayMatches }) => (
                     <div key={`${stage}-${dateLabel}`}>
