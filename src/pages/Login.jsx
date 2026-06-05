@@ -91,14 +91,16 @@ export default function Login() {
           </button>
         </div>
 
-        <div className="mt-8 pt-6 border-t border-white/10 text-center space-y-1">
-          <p className="text-xs text-indigo-300/60">
-            Entrá siempre en <span className="text-indigo-200 font-medium">http://localhost:5173</span>
-          </p>
-          <p className="text-[11px] text-indigo-300/40">
-            El puerto 4000 es solo la consola técnica de Firebase (admin/dev), no es la app.
-          </p>
-        </div>
+        {import.meta.env.DEV && (
+          <div className="mt-8 pt-6 border-t border-white/10 text-center space-y-1">
+            <p className="text-xs text-indigo-300/60">
+              Entrá siempre en <span className="text-indigo-200 font-medium">http://localhost:5173</span>
+            </p>
+            <p className="text-[11px] text-indigo-300/40">
+              El puerto 4000 es solo la consola técnica de Firebase (admin/dev), no es la app.
+            </p>
+          </div>
+        )}
 
       </div>
     </div>
