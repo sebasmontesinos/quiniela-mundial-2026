@@ -1,6 +1,13 @@
 /**
  * Fixture completo Mundial 2026 — 104 partidos (72 grupos + 32 eliminatoria).
  * 48 selecciones confirmadas en 12 grupos de 4. 16 sedes en México, EE. UU. y Canadá.
+ *
+ * Todas las fechas están en UTC con formato ISO 8601 (Z).
+ * Los horarios siguen la franja oficial FIFA 2026:
+ *   17:00 UTC — mañana (11:00 MX / 13:00 BO)
+ *   20:00 UTC — tarde    (14:00 MX / 16:00 BO)
+ *   23:00 UTC — noche    (17:00 MX / 19:00 BO)
+ *   02:00 UTC — madrugada del día siguiente (20:00 MX / 22:00 BO)
  */
 
 const VENUES = [
@@ -39,10 +46,6 @@ export const GROUPS = {
 
 const GROUP_LETTERS = Object.keys(GROUPS);
 
-function utc(year, month, day, hour = 18, minute = 0) {
-  return new Date(Date.UTC(year, month - 1, day, hour, minute));
-}
-
 function pickVenue(index) {
   return VENUES[index % VENUES.length];
 }
@@ -56,39 +59,50 @@ const GROUP_PAIRINGS = [
   [1, 2],
 ];
 
-/** Desplazamiento en días desde el 11 de junio para cada fecha de cada grupo. */
+/* Días de junio para cada fecha de grupo (base = 11 de junio) */
 const GROUP_SCHEDULE = {
-  A: [0, 7, 13],
-  B: [0, 6, 12],
-  C: [1, 6, 12],
-  D: [1, 7, 13],
-  E: [2, 8, 14],
-  F: [2, 8, 14],
-  G: [3, 9, 15],
-  H: [3, 9, 15],
-  I: [4, 10, 16],
-  J: [4, 10, 16],
-  K: [5, 11, 16],
-  L: [5, 11, 16],
+  A: { dates: [11, 18, 24], slots: [[19, 20], [17, 20], [17, 20]] },
+  B: { dates: [11, 17, 23], slots: [[23, 2], [17, 20], [17, 20]] },
+  C: { dates: [12, 17, 23], slots: [[17, 20], [23, 2], [23, 2]] },
+  D: { dates: [12, 18, 24], slots: [[17, 20], [17, 20], [17, 20]] },
+  E: { dates: [13, 19, 25], slots: [[17, 20], [17, 20], [17, 20]] },
+  F: { dates: [13, 19, 25], slots: [[23, 2], [17, 20], [17, 20]] },
+  G: { dates: [14, 20, 26], slots: [[17, 20], [23, 2], [17, 20]] },
+  H: { dates: [14, 20, 26], slots: [[17, 20], [17, 20], [23, 2]] },
+  I: { dates: [15, 21, 27], slots: [[23, 2], [17, 20], [17, 20]] },
+  J: { dates: [15, 21, 27], slots: [[17, 20], [17, 20], [17, 20]] },
+  K: { dates: [16, 22, 27], slots: [[17, 20], [23, 2], [17, 20]] },
+  L: { dates: [16, 22, 27], slots: [[17, 20], [17, 20], [23, 2]] },
 };
+
+function fmtDate(month, day, hour, minute = 0) {
+  const mm = String(month).padStart(2, '0');
+  const dd = String(day).padStart(2, '0');
+  const hh = String(hour).padStart(2, '0');
+  const mi = String(minute).padStart(2, '0');
+  return new Date(`2026-${mm}-${dd}T${hh}:${mi}:00Z`);
+}
 
 function buildGroupMatches() {
   const matches = [];
   let venueIndex = 0;
-  const baseDate = utc(2026, 6, 11);
 
   GROUP_LETTERS.forEach((group, gIndex) => {
     const teams = GROUPS[group];
-    const offsets = GROUP_SCHEDULE[group];
+    const schedule = GROUP_SCHEDULE[group];
 
     GROUP_PAIRINGS.forEach((pair, matchIdx) => {
       const md = Math.floor(matchIdx / 2);
       const matchInDay = matchIdx % 2;
-      const dayOffset = offsets[md];
+      const day = schedule.dates[md];
+      const hour = schedule.slots[md][matchInDay];
 
-      const matchDate = new Date(baseDate);
-      matchDate.setUTCDate(baseDate.getUTCDate() + dayOffset);
-      matchDate.setUTCHours(14 + matchInDay * 3, 0, 0, 0);
+      let matchDay = day;
+      if (hour === 2) {
+        matchDay = day + 1;
+      }
+
+      const matchDate = fmtDate(6, matchDay, hour);
 
       let venue;
       const matchId = `GS_${group}_${matchIdx + 1}`;
@@ -152,22 +166,22 @@ function knockoutMatch(config) {
 
 function buildKnockoutMatches() {
   const r32Defs = [
-    ['1º Grupo A', '3º Grupo E/F/H/I', utc(2026, 6, 28, 16)],
-    ['2º Grupo C', '2º Grupo D', utc(2026, 6, 28, 19)],
-    ['2º Grupo A', '2º Grupo B', utc(2026, 6, 28, 22)],
-    ['1º Grupo E', '3º Grupo A/B/C/D', utc(2026, 6, 29, 14)],
-    ['1º Grupo D', '3º Grupo C/E/H/I', utc(2026, 6, 29, 17)],
-    ['1º Grupo B', '3º Grupo A/C/F/G', utc(2026, 6, 29, 20)],
-    ['1º Grupo F', '2º Grupo E', utc(2026, 6, 30, 16)],
-    ['1º Grupo G', '3º Grupo A/B/C/F', utc(2026, 6, 30, 19)],
-    ['1º Grupo C', '3º Grupo B/E/F/I', utc(2026, 6, 30, 22)],
-    ['2º Grupo G', '2º Grupo H', utc(2026, 7, 1, 14)],
-    ['1º Grupo H', '2º Grupo I', utc(2026, 7, 1, 17)],
-    ['1º Grupo I', '2º Grupo J', utc(2026, 7, 1, 20)],
-    ['2º Grupo K', '2º Grupo L', utc(2026, 7, 2, 17)],
-    ['1º Grupo J', '2º Grupo F', utc(2026, 7, 2, 20)],
-    ['1º Grupo K', '3º Grupo D/E/I/J', utc(2026, 7, 3, 17)],
-    ['1º Grupo L', '3º Grupo E/H/I/J', utc(2026, 7, 3, 20)],
+    ['1º Grupo A', '3º Grupo E/F/H/I', fmtDate(6, 28, 17)],
+    ['2º Grupo C', '2º Grupo D', fmtDate(6, 28, 20)],
+    ['2º Grupo A', '2º Grupo B', fmtDate(6, 28, 23)],
+    ['1º Grupo E', '3º Grupo A/B/C/D', fmtDate(6, 29, 17)],
+    ['1º Grupo D', '3º Grupo C/E/H/I', fmtDate(6, 29, 20)],
+    ['1º Grupo B', '3º Grupo A/C/F/G', fmtDate(6, 29, 23)],
+    ['1º Grupo F', '2º Grupo E', fmtDate(6, 30, 17)],
+    ['1º Grupo G', '3º Grupo A/B/C/F', fmtDate(6, 30, 20)],
+    ['1º Grupo C', '3º Grupo B/E/F/I', fmtDate(6, 30, 23)],
+    ['2º Grupo G', '2º Grupo H', fmtDate(7, 1, 17)],
+    ['1º Grupo H', '2º Grupo I', fmtDate(7, 1, 20)],
+    ['1º Grupo I', '2º Grupo J', fmtDate(7, 1, 23)],
+    ['2º Grupo K', '2º Grupo L', fmtDate(7, 2, 17)],
+    ['1º Grupo J', '2º Grupo F', fmtDate(7, 2, 20)],
+    ['1º Grupo K', '3º Grupo D/E/I/J', fmtDate(7, 3, 17)],
+    ['1º Grupo L', '3º Grupo E/H/I/J', fmtDate(7, 3, 20)],
   ];
 
   const r32 = r32Defs.map(([home, away, date], i) =>
@@ -183,14 +197,14 @@ function buildKnockoutMatches() {
   );
 
   const r16Defs = [
-    ['Ganador R32 1', 'Ganador R32 2', utc(2026, 7, 4, 16)],
-    ['Ganador R32 3', 'Ganador R32 4', utc(2026, 7, 4, 20)],
-    ['Ganador R32 5', 'Ganador R32 6', utc(2026, 7, 5, 16)],
-    ['Ganador R32 7', 'Ganador R32 8', utc(2026, 7, 5, 20)],
-    ['Ganador R32 9', 'Ganador R32 10', utc(2026, 7, 6, 16)],
-    ['Ganador R32 11', 'Ganador R32 12', utc(2026, 7, 6, 20)],
-    ['Ganador R32 13', 'Ganador R32 14', utc(2026, 7, 7, 17)],
-    ['Ganador R32 15', 'Ganador R32 16', utc(2026, 7, 7, 21)],
+    ['Ganador R32 1', 'Ganador R32 2', fmtDate(7, 4, 17)],
+    ['Ganador R32 3', 'Ganador R32 4', fmtDate(7, 4, 20)],
+    ['Ganador R32 5', 'Ganador R32 6', fmtDate(7, 5, 17)],
+    ['Ganador R32 7', 'Ganador R32 8', fmtDate(7, 5, 20)],
+    ['Ganador R32 9', 'Ganador R32 10', fmtDate(7, 6, 17)],
+    ['Ganador R32 11', 'Ganador R32 12', fmtDate(7, 6, 20)],
+    ['Ganador R32 13', 'Ganador R32 14', fmtDate(7, 7, 17)],
+    ['Ganador R32 15', 'Ganador R32 16', fmtDate(7, 7, 20)],
   ];
 
   const r16 = r16Defs.map(([home, away, date], i) =>
@@ -206,10 +220,10 @@ function buildKnockoutMatches() {
   );
 
   const qfDefs = [
-    ['Ganador R16 1', 'Ganador R16 2', utc(2026, 7, 9, 18)],
-    ['Ganador R16 3', 'Ganador R16 4', utc(2026, 7, 10, 17)],
-    ['Ganador R16 5', 'Ganador R16 6', utc(2026, 7, 11, 16)],
-    ['Ganador R16 7', 'Ganador R16 8', utc(2026, 7, 11, 20)],
+    ['Ganador R16 1', 'Ganador R16 2', fmtDate(7, 9, 20)],
+    ['Ganador R16 3', 'Ganador R16 4', fmtDate(7, 10, 17)],
+    ['Ganador R16 5', 'Ganador R16 6', fmtDate(7, 11, 17)],
+    ['Ganador R16 7', 'Ganador R16 8', fmtDate(7, 11, 20)],
   ];
 
   const qf = qfDefs.map(([home, away, date], i) =>
@@ -231,7 +245,7 @@ function buildKnockoutMatches() {
       matchNumber: 101,
       homeTeam: 'Ganador QF 1',
       awayTeam: 'Ganador QF 2',
-      matchDate: utc(2026, 7, 14, 20),
+      matchDate: fmtDate(7, 14, 20),
       venue: VENUES[4],
     }),
     knockoutMatch({
@@ -240,7 +254,7 @@ function buildKnockoutMatches() {
       matchNumber: 102,
       homeTeam: 'Ganador QF 3',
       awayTeam: 'Ganador QF 4',
-      matchDate: utc(2026, 7, 15, 20),
+      matchDate: fmtDate(7, 15, 20),
       venue: VENUES[3],
     }),
   ];
@@ -251,7 +265,7 @@ function buildKnockoutMatches() {
     matchNumber: 103,
     homeTeam: 'Perdedor SF 1',
     awayTeam: 'Perdedor SF 2',
-    matchDate: utc(2026, 7, 18, 19),
+    matchDate: fmtDate(7, 18, 17),
     venue: VENUES[5],
   });
 
@@ -261,7 +275,7 @@ function buildKnockoutMatches() {
     matchNumber: 104,
     homeTeam: 'Ganador SF 1',
     awayTeam: 'Ganador SF 2',
-    matchDate: utc(2026, 7, 19, 20),
+    matchDate: fmtDate(7, 19, 20),
     venue: VENUES[3],
   });
 
