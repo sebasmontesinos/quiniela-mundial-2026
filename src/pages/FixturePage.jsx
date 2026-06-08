@@ -13,7 +13,7 @@ import {
   fetchUserSimPredictions,
   saveSimPrediction,
 } from '../services/simulation';
-import { formatMatchDate, dateKey } from '../constants';
+import { formatMatchTime, formatDateHeader } from '../utils/dateUtils.js';
 import { CardSkeleton } from '../components/Skeleton';
 import Countdown from '../components/Countdown';
 import { TeamFlag } from '../data/teamCrests.jsx';
@@ -160,7 +160,7 @@ function MatchCard({ match, prediction, userId, onPredictionSaved, simulationMod
       </div>
 
       <div className="text-xs text-[#B8C5F0] space-y-1">
-        <p>{formatMatchDate(match.matchDate)}</p>
+        <p>{formatMatchTime(match.matchDate)}</p>
         <p>
           {match.stadium} — {match.city}
         </p>
@@ -277,7 +277,7 @@ export default function FixturePage() {
     matches.forEach((match) => {
       const stage = match.stage || 'group';
       if (!byStage[stage]) byStage[stage] = {};
-      const dk = dateKey(match.matchDate);
+      const dk = formatDateHeader(match.matchDate);
       if (!byStage[stage][dk]) byStage[stage][dk] = [];
       byStage[stage][dk].push(match);
     });

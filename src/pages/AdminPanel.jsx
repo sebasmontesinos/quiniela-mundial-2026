@@ -8,7 +8,7 @@ import {
   isPlayerUser,
   updateUserStatus,
 } from '../services/users';
-import { formatDate } from '../constants';
+import { formatMatchDate } from '../utils/dateUtils.js';
 
 function StatusBadge({ status }) {
   const styles = {
@@ -208,7 +208,7 @@ export default function AdminPanel() {
                               )}
                             </td>
                             <td className="px-4 py-3 text-[#B8C5F0]">
-                              {formatDate(user.createdAt)}
+                              {formatMatchDate(user.createdAt)}
                             </td>
                             <td className="px-4 py-3">
                               {isAdminUser ? (

@@ -10,7 +10,7 @@ import {
   setSimulationMode,
 } from '../../services/simulation';
 
-import { formatMatchDate } from '../../constants';
+import { formatMatchDate } from '../../utils/dateUtils.js';
 
 export default function SimulationTab() {
   const { currentUser, isAdmin, simulationMode } = useAuth();

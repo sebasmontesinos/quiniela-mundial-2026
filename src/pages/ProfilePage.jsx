@@ -3,7 +3,7 @@ import AppNav from '../components/AppNav';
 import { useAuth } from '../contexts/AuthContext';
 import { fetchAllMatches } from '../services/matches';
 import { fetchUserPredictions } from '../services/predictions';
-import { formatMatchDate, formatDate } from '../constants';
+import { formatMatchDate, formatDateHeader } from '../utils/dateUtils.js';
 import { TeamFlag } from '../data/teamCrests.jsx';
 
 function TeamLabel({ teamName }) {
@@ -151,7 +151,7 @@ export default function ProfilePage() {
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 mt-2">
               {createdAt && (
                 <span className="text-xs text-[#94A3B8]">
-                  Miembro desde {formatDate(createdAt)}
+                  Miembro desde {formatDateHeader(createdAt)}
                 </span>
               )}
               <span

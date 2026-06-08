@@ -54,13 +54,12 @@ function toDate(value) {
 function formatPredictionDate(value) {
   const d = toDate(value);
   if (!d) return '—';
-  return d.toLocaleString('en-US', {
+  return new Intl.DateTimeFormat(undefined, {
     month: 'short',
     day: 'numeric',
     hour: 'numeric',
     minute: '2-digit',
-    hour12: true,
-  }).replace(',', ' at');
+  }).format(d);
 }
 
 function getResultLabel(points, matchFinished) {
