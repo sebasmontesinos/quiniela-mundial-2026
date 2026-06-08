@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import AppNav from '../components/AppNav';
 import { useAuth } from '../contexts/AuthContext';
-import { STAGE_LABELS, STAGE_ORDER } from '../data/fixture';
+
 import {
   isMatchLocked,
   subscribeToMatches,
@@ -240,7 +240,6 @@ export default function FixturePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedDate, setSelectedDate] = useState(null);
-  const [showAll, setShowAll] = useState(false);
   const navRef = useRef(null);
 
   const reloadPredictions = async () => {
@@ -338,43 +337,12 @@ export default function FixturePage() {
     setSelectedDate(initialDate);
   }
 
-  const visibleDates = useMemo(() => {
-    if (dateKeys.length === 0 || !selectedDate) return [];
-    const idx = dateKeys.indexOf(selectedDate);
-    if (idx === -1) return [];
-    const start = Math.max(0, idx - 2);
-    const end = Math.min(dateKeys.length, idx + 3);
-    return dateKeys.slice(start, end);
-  }, [dateKeys, selectedDate]);
-
-  const filteredByStage = useMemo(() => {
-    let filtered;
-    if (showAll) {
-      filtered = matches;
-    } else if (selectedDate) {
-      filtered = matches.filter((m) => localDateKey(m.matchDate) === selectedDate);
-    } else {
-      filtered = [];
-    }
-
-    const byStage = {};
-    filtered.forEach((match) => {
-      const stage = match.stage || 'group';
-      if (!byStage[stage]) byStage[stage] = [];
-      byStage[stage].push(match);
-    });
-
-    return STAGE_ORDER.filter((s) => byStage[s]).map((stage) => ({
-      stage,
-      label: STAGE_LABELS[stage],
-      matches: byStage[stage],
-    }));
-  }, [matches, selectedDate, showAll]);
-
-  const isToday = selectedDate === todayKey;
+  const dayMatches = useMemo(() => {
+    if (!selectedDate) return [];
+    return matches.filter((m) => localDateKey(m.matchDate) === selectedDate);
+  }, [matches, selectedDate]);
 
   const handleGoToday = () => {
-    setShowAll(false);
     if (dateKeys.indexOf(todayKey) !== -1) {
       setSelectedDate(todayKey);
     } else {
@@ -389,18 +357,6 @@ export default function FixturePage() {
       }
       setSelectedDate(best);
     }
-  };
-
-  const handlePrev = () => {
-    setShowAll(false);
-    const idx = dateKeys.indexOf(selectedDate);
-    if (idx > 0) setSelectedDate(dateKeys[idx - 1]);
-  };
-
-  const handleNext = () => {
-    setShowAll(false);
-    const idx = dateKeys.indexOf(selectedDate);
-    if (idx < dateKeys.length - 1) setSelectedDate(dateKeys[idx + 1]);
   };
 
   return (
@@ -461,155 +417,59 @@ export default function FixturePage() {
           </div>
         ) : (
           <>
-            {!showAll && (
-              <div className="flex items-center gap-1 mb-4" ref={navRef}>
-                <button
-                  type="button"
-                  onClick={handlePrev}
-                  disabled={dateKeys.indexOf(selectedDate) <= 0}
-                  className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg bg-[#1A3399] border border-[#3E5FD9] text-white hover:bg-[#3E5FD9] disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-lg"
-                  aria-label="Día anterior"
-                >
-                  ←
-                </button>
-                <div className="flex gap-1 overflow-x-auto no-scrollbar flex-1 snap-x">
-                  {visibleDates.map((key) => (
-                    <button
-                      key={key}
-                      type="button"
-                      onClick={() => { setShowAll(false); setSelectedDate(key); }}
-                      className={`flex-shrink-0 snap-start px-3 py-2 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap ${
-                        key === selectedDate
-                          ? 'bg-[#FFB800] text-[#1A202C]'
-                          : 'bg-[#1A3399] border border-[#3E5FD9] text-[#B8C5F0] hover:bg-[#3E5FD9] hover:text-white'
-                      }`}
-                    >
-                      {shortDateLabel(key)}
-                    </button>
-                  ))}
-                </div>
-                <button
-                  type="button"
-                  onClick={handleNext}
-                  disabled={dateKeys.indexOf(selectedDate) >= dateKeys.length - 1}
-                  className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg bg-[#1A3399] border border-[#3E5FD9] text-white hover:bg-[#3E5FD9] disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-lg"
-                  aria-label="Día siguiente"
-                >
-                  →
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowAll(true)}
-                  className={`flex-shrink-0 px-3 py-2 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap ${
-                    showAll
-                      ? 'bg-[#FFB800] text-[#1A202C]'
-                      : 'bg-[#1A3399] border border-[#3E5FD9] text-[#B8C5F0] hover:bg-[#3E5FD9] hover:text-white'
-                  }`}
-                >
-                  Todos
-                </button>
-              </div>
-            )}
-
-            {!isToday && !showAll && (
+            <div className="flex items-center gap-1 mb-4 overflow-x-auto no-scrollbar snap-x" ref={navRef}>
               <button
                 type="button"
                 onClick={handleGoToday}
-                className="mb-4 px-4 py-2 rounded-lg text-sm font-semibold bg-[#06B894] text-white hover:bg-emerald-500 transition-colors flex items-center gap-2"
+                className="flex-shrink-0 px-3 py-2 rounded-lg text-xs font-semibold bg-[#06B894] text-white hover:bg-emerald-500 transition-colors whitespace-nowrap"
               >
-                📅 Hoy
+                HOY
               </button>
-            )}
-
-            {showAll && (
-              <div className="mb-4">
+              {dateKeys.map((key) => (
                 <button
+                  key={key}
                   type="button"
-                  onClick={() => { setShowAll(false); handleGoToday(); }}
-                  className="px-4 py-2 rounded-lg text-sm font-semibold bg-[#3E5FD9] text-white hover:bg-[#1B3FB5] transition-colors"
+                  onClick={() => setSelectedDate(key)}
+                  className={`flex-shrink-0 snap-start px-3 py-2 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap ${
+                    key === selectedDate
+                      ? 'bg-[#FFB800] text-[#1A202C] font-bold'
+                      : 'bg-[#1A3399] border border-[#3E5FD9] text-white hover:bg-[#3E5FD9] hover:text-white'
+                  }`}
                 >
-                  ← Volver a vista por día
+                  {shortDateLabel(key)}
                 </button>
-              </div>
-            )}
+              ))}
+            </div>
 
-            {showAll ? (
-              <div className="space-y-10">
-                {(() => {
-                  const byStage = {};
-                  matches.forEach((match) => {
-                    const stage = match.stage || 'group';
-                    if (!byStage[stage]) byStage[stage] = {};
-                    const dk = formatDateHeader(match.matchDate);
-                    if (!byStage[stage][dk]) byStage[stage][dk] = [];
-                    byStage[stage][dk].push(match);
-                  });
-                  return STAGE_ORDER.filter((s) => byStage[s]).map((stage) => (
-                    <section key={stage}>
-                      <h2 className="text-lg font-extrabold text-white uppercase tracking-wider">
-                        {STAGE_LABELS[stage].toUpperCase()}
-                      </h2>
-                      <span className="fifa-gold-underline mb-4" />
-                      <div className="space-y-6">
-                        {Object.keys(byStage[stage]).map((dateLabel) => (
-                          <div key={`${stage}-${dateLabel}`}>
-                            <h3 className="text-sm font-semibold text-[#B8C5F0] mb-3">
-                              {dateLabel}
-                            </h3>
-                            <div className="grid gap-4">
-                              {byStage[stage][dateLabel].map((match) => (
-                                <MatchCard
-                                  key={match.id}
-                                  match={match}
-                                  prediction={predictions[match.id]}
-                                  userId={currentUser?.uid}
-                                  onPredictionSaved={reloadPredictions}
-                                  simulationMode={simulationMode}
-                                />
-                              ))}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </section>
-                  ));
-                })()}
-              </div>
-            ) : selectedDate ? (
-              <div className="space-y-4">
-                <h2 className="text-lg font-extrabold text-white">
+            {selectedDate && (
+              <>
+                <h2 className="text-lg font-extrabold text-white flex items-center gap-2 flex-wrap">
                   {formatHeaderFromKey(selectedDate)}
+                  <span className="text-sm text-[#B8C5F0] font-bold">
+                    ({dayMatches.length} partido{dayMatches.length !== 1 ? 's' : ''})
+                  </span>
                 </h2>
                 <span className="fifa-gold-underline mb-4" />
-                {filteredByStage.length === 0 ? (
+                {dayMatches.length === 0 ? (
                   <div className="fifa-card text-center py-8">
-                    <p className="text-[#B8C5F0]">No hay partidos en esta fecha.</p>
+                    <p className="text-[#B8C5F0]">No hay partidos este día</p>
                   </div>
                 ) : (
-                  filteredByStage.map(({ stage, label, matches: stageMatches }) => (
-                    <div key={stage} className="space-y-4">
-                      {filteredByStage.length > 1 && (
-                        <h3 className="text-sm font-bold text-fifa-gold uppercase tracking-wider">
-                          {label}
-                        </h3>
-                      )}
-                      <div className="grid gap-4">
-                        {stageMatches.map((match) => (
-                          <MatchCard
-                            key={match.id}
-                            match={match}
-                            prediction={predictions[match.id]}
-                            userId={currentUser?.uid}
-                            onPredictionSaved={reloadPredictions}
-                            simulationMode={simulationMode}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  ))
+                  <div className="grid gap-4">
+                    {dayMatches.map((match) => (
+                      <MatchCard
+                        key={match.id}
+                        match={match}
+                        prediction={predictions[match.id]}
+                        userId={currentUser?.uid}
+                        onPredictionSaved={reloadPredictions}
+                        simulationMode={simulationMode}
+                      />
+                    ))}
+                  </div>
                 )}
-              </div>
-            ) : null}
+              </>
+            )}
           </>
         )}
       </div>
