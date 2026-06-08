@@ -203,12 +203,45 @@ function MatchCard({ match, prediction, userId, onPredictionSaved, simulationMod
   );
 }
 
+function localDateKey(value) {
+  const d = value?.toDate ? value.toDate() : new Date(value);
+  if (isNaN(d)) return '';
+  return new Intl.DateTimeFormat(undefined, {
+    year: 'numeric', month: 'numeric', day: 'numeric'
+  }).format(d);
+}
+
+function shortDateLabel(key) {
+  if (!key) return '';
+  const [m, d, y] = key.split('/');
+  const date = new Date(+y, +m - 1, +d);
+  return new Intl.DateTimeFormat(undefined, {
+    weekday: 'short', day: 'numeric', month: 'numeric'
+  }).format(date);
+}
+
+function formatHeaderFromKey(key) {
+  if (!key) return '';
+  const [m, d, y] = key.split('/');
+  const date = new Date(+y, +m - 1, +d);
+  return formatDateHeader(date);
+}
+
+function getTodayKey() {
+  return new Intl.DateTimeFormat(undefined, {
+    year: 'numeric', month: 'numeric', day: 'numeric'
+  }).format(new Date());
+}
+
 export default function FixturePage() {
   const { currentUser, simulationMode } = useAuth();
   const [matches, setMatches] = useState([]);
   const [predictions, setPredictions] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [showAll, setShowAll] = useState(false);
+  const navRef = useRef(null);
 
   const reloadPredictions = async () => {
     if (!currentUser) return;
@@ -271,26 +304,104 @@ export default function FixturePage() {
     return unsub;
   }, [currentUser, simulationMode]);
 
-  const grouped = useMemo(() => {
-    const byStage = {};
+  const dateKeys = useMemo(() => {
+    const keys = new Set();
+    matches.forEach((m) => {
+      const k = localDateKey(m.matchDate);
+      if (k) keys.add(k);
+    });
+    return [...keys].sort((a, b) => {
+      const [ma, da, ya] = a.split('/');
+      const [mb, db, yb] = b.split('/');
+      return new Date(ya, ma - 1, da) - new Date(yb, mb - 1, db);
+    });
+  }, [matches]);
 
-    matches.forEach((match) => {
+  const todayKey = useMemo(() => getTodayKey(), []);
+
+  const initialDate = useMemo(() => {
+    if (dateKeys.length === 0) return null;
+    if (dateKeys.indexOf(todayKey) !== -1) return todayKey;
+    const today = new Date();
+    let best = dateKeys[0];
+    for (const k of dateKeys) {
+      const [m, d, y] = k.split('/');
+      if (new Date(y, m - 1, d) >= today) {
+        best = k;
+        break;
+      }
+    }
+    return best;
+  }, [dateKeys, todayKey]);
+
+  if (selectedDate === null && initialDate !== null) {
+    setSelectedDate(initialDate);
+  }
+
+  const visibleDates = useMemo(() => {
+    if (dateKeys.length === 0 || !selectedDate) return [];
+    const idx = dateKeys.indexOf(selectedDate);
+    if (idx === -1) return [];
+    const start = Math.max(0, idx - 2);
+    const end = Math.min(dateKeys.length, idx + 3);
+    return dateKeys.slice(start, end);
+  }, [dateKeys, selectedDate]);
+
+  const filteredByStage = useMemo(() => {
+    let filtered;
+    if (showAll) {
+      filtered = matches;
+    } else if (selectedDate) {
+      filtered = matches.filter((m) => localDateKey(m.matchDate) === selectedDate);
+    } else {
+      filtered = [];
+    }
+
+    const byStage = {};
+    filtered.forEach((match) => {
       const stage = match.stage || 'group';
-      if (!byStage[stage]) byStage[stage] = {};
-      const dk = formatDateHeader(match.matchDate);
-      if (!byStage[stage][dk]) byStage[stage][dk] = [];
-      byStage[stage][dk].push(match);
+      if (!byStage[stage]) byStage[stage] = [];
+      byStage[stage].push(match);
     });
 
     return STAGE_ORDER.filter((s) => byStage[s]).map((stage) => ({
       stage,
       label: STAGE_LABELS[stage],
-      dates: Object.keys(byStage[stage]).map((dk) => ({
-        dateLabel: dk,
-        matches: byStage[stage][dk],
-      })),
+      matches: byStage[stage],
     }));
-  }, [matches]);
+  }, [matches, selectedDate, showAll]);
+
+  const isToday = selectedDate === todayKey;
+
+  const handleGoToday = () => {
+    setShowAll(false);
+    if (dateKeys.indexOf(todayKey) !== -1) {
+      setSelectedDate(todayKey);
+    } else {
+      const today = new Date();
+      let best = dateKeys[0];
+      for (const k of dateKeys) {
+        const [m, d, y] = k.split('/');
+        if (new Date(y, m - 1, d) >= today) {
+          best = k;
+          break;
+        }
+      }
+      setSelectedDate(best);
+    }
+  };
+
+  const handlePrev = () => {
+    setShowAll(false);
+    const idx = dateKeys.indexOf(selectedDate);
+    if (idx > 0) setSelectedDate(dateKeys[idx - 1]);
+  };
+
+  const handleNext = () => {
+    setShowAll(false);
+    const idx = dateKeys.indexOf(selectedDate);
+    if (idx < dateKeys.length - 1) setSelectedDate(dateKeys[idx + 1]);
+  };
 
   return (
     <div className="min-h-screen bg-fifa-gradient text-[#F8FAFC]">
@@ -314,15 +425,11 @@ export default function FixturePage() {
           </div>
         )}
 
-        <header className="mb-8">
+        <header className="mb-4">
           <h1 className="text-4xl font-extrabold text-white flex items-center gap-3">
             📅 Fixture Mundial 2026
           </h1>
           <span className="fifa-gold-underline mt-2" />
-          <p className="text-[#B8C5F0] mt-3 text-sm">
-            Cargá tus resultados antes de que arranque cada partido. 3 pts plenos, 1 pt por
-            acertar el ganador.
-          </p>
         </header>
 
         {error && (
@@ -353,21 +460,141 @@ export default function FixturePage() {
             </p>
           </div>
         ) : (
-          <div className="space-y-10">
-            {grouped.map(({ stage, label, dates }) => (
-              <section key={stage}>
-                <h2 className="text-lg font-extrabold text-white uppercase tracking-wider">
-                  {label.toUpperCase()}
+          <>
+            {!showAll && (
+              <div className="flex items-center gap-1 mb-4" ref={navRef}>
+                <button
+                  type="button"
+                  onClick={handlePrev}
+                  disabled={dateKeys.indexOf(selectedDate) <= 0}
+                  className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg bg-[#1A3399] border border-[#3E5FD9] text-white hover:bg-[#3E5FD9] disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-lg"
+                  aria-label="Día anterior"
+                >
+                  ←
+                </button>
+                <div className="flex gap-1 overflow-x-auto no-scrollbar flex-1 snap-x">
+                  {visibleDates.map((key) => (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => { setShowAll(false); setSelectedDate(key); }}
+                      className={`flex-shrink-0 snap-start px-3 py-2 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap ${
+                        key === selectedDate
+                          ? 'bg-[#FFB800] text-[#1A202C]'
+                          : 'bg-[#1A3399] border border-[#3E5FD9] text-[#B8C5F0] hover:bg-[#3E5FD9] hover:text-white'
+                      }`}
+                    >
+                      {shortDateLabel(key)}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  disabled={dateKeys.indexOf(selectedDate) >= dateKeys.length - 1}
+                  className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg bg-[#1A3399] border border-[#3E5FD9] text-white hover:bg-[#3E5FD9] disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-lg"
+                  aria-label="Día siguiente"
+                >
+                  →
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowAll(true)}
+                  className={`flex-shrink-0 px-3 py-2 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap ${
+                    showAll
+                      ? 'bg-[#FFB800] text-[#1A202C]'
+                      : 'bg-[#1A3399] border border-[#3E5FD9] text-[#B8C5F0] hover:bg-[#3E5FD9] hover:text-white'
+                  }`}
+                >
+                  Todos
+                </button>
+              </div>
+            )}
+
+            {!isToday && !showAll && (
+              <button
+                type="button"
+                onClick={handleGoToday}
+                className="mb-4 px-4 py-2 rounded-lg text-sm font-semibold bg-[#06B894] text-white hover:bg-emerald-500 transition-colors flex items-center gap-2"
+              >
+                📅 Hoy
+              </button>
+            )}
+
+            {showAll && (
+              <div className="mb-4">
+                <button
+                  type="button"
+                  onClick={() => { setShowAll(false); handleGoToday(); }}
+                  className="px-4 py-2 rounded-lg text-sm font-semibold bg-[#3E5FD9] text-white hover:bg-[#1B3FB5] transition-colors"
+                >
+                  ← Volver a vista por día
+                </button>
+              </div>
+            )}
+
+            {showAll ? (
+              <div className="space-y-10">
+                {(() => {
+                  const byStage = {};
+                  matches.forEach((match) => {
+                    const stage = match.stage || 'group';
+                    if (!byStage[stage]) byStage[stage] = {};
+                    const dk = formatDateHeader(match.matchDate);
+                    if (!byStage[stage][dk]) byStage[stage][dk] = [];
+                    byStage[stage][dk].push(match);
+                  });
+                  return STAGE_ORDER.filter((s) => byStage[s]).map((stage) => (
+                    <section key={stage}>
+                      <h2 className="text-lg font-extrabold text-white uppercase tracking-wider">
+                        {STAGE_LABELS[stage].toUpperCase()}
+                      </h2>
+                      <span className="fifa-gold-underline mb-4" />
+                      <div className="space-y-6">
+                        {Object.keys(byStage[stage]).map((dateLabel) => (
+                          <div key={`${stage}-${dateLabel}`}>
+                            <h3 className="text-sm font-semibold text-[#B8C5F0] mb-3">
+                              {dateLabel}
+                            </h3>
+                            <div className="grid gap-4">
+                              {byStage[stage][dateLabel].map((match) => (
+                                <MatchCard
+                                  key={match.id}
+                                  match={match}
+                                  prediction={predictions[match.id]}
+                                  userId={currentUser?.uid}
+                                  onPredictionSaved={reloadPredictions}
+                                  simulationMode={simulationMode}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </section>
+                  ));
+                })()}
+              </div>
+            ) : selectedDate ? (
+              <div className="space-y-4">
+                <h2 className="text-lg font-extrabold text-white">
+                  {formatHeaderFromKey(selectedDate)}
                 </h2>
                 <span className="fifa-gold-underline mb-4" />
-                <div className="space-y-6">
-                  {dates.map(({ dateLabel, matches: dayMatches }) => (
-                    <div key={`${stage}-${dateLabel}`}>
-                      <h3 className="text-sm font-semibold text-[#B8C5F0] mb-3">
-                        {dateLabel}
-                      </h3>
+                {filteredByStage.length === 0 ? (
+                  <div className="fifa-card text-center py-8">
+                    <p className="text-[#B8C5F0]">No hay partidos en esta fecha.</p>
+                  </div>
+                ) : (
+                  filteredByStage.map(({ stage, label, matches: stageMatches }) => (
+                    <div key={stage} className="space-y-4">
+                      {filteredByStage.length > 1 && (
+                        <h3 className="text-sm font-bold text-fifa-gold uppercase tracking-wider">
+                          {label}
+                        </h3>
+                      )}
                       <div className="grid gap-4">
-                        {dayMatches.map((match) => (
+                        {stageMatches.map((match) => (
                           <MatchCard
                             key={match.id}
                             match={match}
@@ -379,11 +606,11 @@ export default function FixturePage() {
                         ))}
                       </div>
                     </div>
-                  ))}
-                </div>
-              </section>
-            ))}
-          </div>
+                  ))
+                )}
+              </div>
+            ) : null}
+          </>
         )}
       </div>
     </div>

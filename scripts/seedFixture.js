@@ -7,44 +7,40 @@
  *   3. Si ningún emulador está activo, intenta con Application Default Credentials.
  *
  * Uso:
- *   node scripts/seedFixture.js
+ *   GOOGLE_APPLICATION_CREDENTIALS="/ruta/al/json.json" node scripts/seedFixture.js
  */
-import admin from 'firebase-admin';
+
+import { initializeApp, cert } from 'firebase-admin/app';
+import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 import { readFileSync } from 'fs';
 import { MATCHES } from '../src/data/fixture.js';
 
 const projectId = process.env.VITE_FIREBASE_PROJECT_ID || 'fixture-mundial-2026';
-
-if (!admin.apps.length) {
-  const firebaseConfig = { projectId };
-
-  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-    firebaseConfig.credential = admin.credential.cert(serviceAccount);
-  } else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-    const serviceAccount = JSON.parse(readFileSync(process.env.GOOGLE_APPLICATION_CREDENTIALS, 'utf-8'));
-    firebaseConfig.credential = admin.credential.cert(serviceAccount);
-  } else {
-    console.log('⚠ No se encontró variable FIREBASE_SERVICE_ACCOUNT ni GOOGLE_APPLICATION_CREDENTIALS.');
-    console.log('  Usando Application Default Credentials (gcloud / ADC).');
-    firebaseConfig.credential = admin.credential.applicationDefault();
-  }
-
-  admin.initializeApp(firebaseConfig);
-}
-
-const db = admin.firestore();
 const isEmulator = !!process.env.FIRESTORE_EMULATOR_HOST;
 
+let app;
+if (!isEmulator && process.env.FIREBASE_SERVICE_ACCOUNT) {
+  const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+  app = initializeApp({ credential: cert(serviceAccount), projectId });
+} else if (!isEmulator && process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+  const serviceAccount = JSON.parse(
+    readFileSync(process.env.GOOGLE_APPLICATION_CREDENTIALS, 'utf8')
+  );
+  app = initializeApp({ credential: cert(serviceAccount), projectId });
+} else {
+  app = initializeApp({ projectId });
+}
+
+const db = getFirestore(app);
+
 function toTimestamp(date) {
-  return admin.firestore.Timestamp.fromDate(date instanceof Date ? date : new Date(date));
+  return Timestamp.fromDate(date instanceof Date ? date : new Date(date));
 }
 
 async function seed() {
   const target = isEmulator ? `emulator (${process.env.FIRESTORE_EMULATOR_HOST})` : 'production';
   console.log(`Sembrando ${MATCHES.length} partidos en ${target} (${projectId})...`);
 
-  /* limpia partidos existentes */
   const existing = await db.collection('matches').get();
   if (!existing.empty) {
     console.log(`  Eliminando ${existing.size} partidos existentes...`);
@@ -90,12 +86,11 @@ async function seed() {
 
 seed().catch((err) => {
   console.error('Error al sembrar fixture:', err.message);
-  if (!process.env.FIREBASE_SERVICE_ACCOUNT && !process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+  if (!process.env.FIREBASE_SERVICE_ACCOUNT && !process.env.GOOGLE_APPLICATION_CREDENTIALS && !isEmulator) {
     console.error('\n💡 Necesitás una cuenta de servicio. Creala en Firebase Console:');
     console.error('   Project Settings → Service accounts → Generate new private key');
     console.error('   Luego pasala como variable de entorno:');
-    console.error('   export FIREBASE_SERVICE_ACCOUNT="$(cat ruta/al/json.json)"');
-    console.error('   O: export GOOGLE_APPLICATION_CREDENTIALS=ruta/al/json.json');
+    console.error('   export GOOGLE_APPLICATION_CREDENTIALS=ruta/al/json.json');
   }
   process.exit(1);
 });
