@@ -203,16 +203,19 @@ function MatchCard({ match, prediction, userId, onPredictionSaved, simulationMod
   );
 }
 
-function localDateKey(value) {
-  const d = value?.toDate
-    ? value.toDate()
-    : value?.seconds
-      ? new Date(value.seconds * 1000)
-      : new Date(value);
-  if (isNaN(d)) return '';
-  return new Intl.DateTimeFormat(undefined, {
-    year: 'numeric', month: 'numeric', day: 'numeric'
-  }).format(d);
+function getMatchDate(match) {
+  const md = match?.matchDate
+  if (!md) return new Date()
+  if (md.toDate) return md.toDate()
+  if (md.seconds) return new Date(md.seconds * 1000)
+  return new Date(md)
+}
+
+function getLocalDateKey(match) {
+  return new Intl.DateTimeFormat('es', {
+    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    year: 'numeric', month: '2-digit', day: '2-digit'
+  }).format(getMatchDate(match))
 }
 
 function shortDateLabel(key) {
@@ -229,12 +232,6 @@ function formatHeaderFromKey(key) {
   const [m, d, y] = key.split('/');
   const date = new Date(+y, +m - 1, +d);
   return formatDateHeader(date);
-}
-
-function getTodayKey() {
-  return new Intl.DateTimeFormat(undefined, {
-    year: 'numeric', month: 'numeric', day: 'numeric'
-  }).format(new Date());
 }
 
 export default function FixturePage() {
@@ -291,18 +288,17 @@ export default function FixturePage() {
   }, [currentUser, simulationMode]);
 
   const visibleMatches = useMemo(() => {
-    const isRealTeam = (name) => name &&
-      !name.includes('Ganador') &&
-      !name.includes('Perdedor') &&
-      !name.includes('1º') &&
-      !name.includes('2º') &&
-      !name.includes('3º') &&
-      !name.includes('Grupo');
-    return matches.filter((match) => {
-      if (match.stage === 'group') return true;
-      return isRealTeam(match.homeTeam) && isRealTeam(match.awayTeam);
-    });
-  }, [matches]);
+    return matches.filter(match => {
+      if (match.stage === 'group') return true
+      const isReal = (name) => {
+        if (!name) return false
+        const placeholders = ['Ganador', 'Perdedor', '1º', '2º', '3º',
+                             'Grupo', 'Winner', 'Runner', 'Best']
+        return !placeholders.some(p => name.includes(p))
+      }
+      return isReal(match.homeTeam) && isReal(match.awayTeam)
+    })
+  }, [matches])
 
   const pendingCount = useMemo(() => {
     if (simulationMode) return 0;
@@ -322,23 +318,21 @@ export default function FixturePage() {
   }, [pendingCount, simulationMode]);
 
   const dateKeys = useMemo(() => {
-    const keys = new Set();
-    visibleMatches.forEach((m) => {
-      const k = localDateKey(m.matchDate);
-      if (k) keys.add(k);
-    });
-    return [...keys].sort((a, b) => {
-      const [ma, da, ya] = a.split('/');
-      const [mb, db, yb] = b.split('/');
-      return new Date(ya, ma - 1, da) - new Date(yb, mb - 1, db);
-    });
-  }, [visibleMatches]);
+    return [...new Set(visibleMatches.map(getLocalDateKey))].sort()
+  }, [visibleMatches])
 
-  const todayKey = useMemo(() => getTodayKey(), []);
+  const todayKey = useMemo(() => {
+    return new Intl.DateTimeFormat('es', {
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      year: 'numeric', month: '2-digit', day: '2-digit'
+    }).format(new Date())
+  }, [])
 
   const initialDate = useMemo(() => {
-    return dateKeys.length > 0 ? dateKeys[0] : null;
-  }, [dateKeys]);
+    if (dateKeys.length === 0) return null
+    if (dateKeys.includes(todayKey)) return todayKey
+    return dateKeys.find(k => k >= todayKey) || dateKeys[0]
+  }, [dateKeys, todayKey])
 
   const todayHasMatches = dateKeys.indexOf(todayKey) !== -1;
 
@@ -348,7 +342,7 @@ export default function FixturePage() {
 
   const dayMatches = useMemo(() => {
     if (!selectedDate) return [];
-    return visibleMatches.filter((m) => localDateKey(m.matchDate) === selectedDate);
+    return visibleMatches.filter((m) => getLocalDateKey(m) === selectedDate);
   }, [visibleMatches, selectedDate]);
 
   useEffect(() => {
