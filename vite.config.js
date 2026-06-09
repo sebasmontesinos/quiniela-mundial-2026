@@ -7,7 +7,10 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
+      devOptions: {
+        enabled: false,
+      },
       includeAssets: ['favicon.svg', 'icons/*.png'],
       manifest: {
         name: 'Quiniela Mundial 2026',
@@ -23,6 +26,9 @@ export default defineConfig({
         ],
       },
       workbox: {
+        cleanupOutdatedCaches: true,
+        skipWaiting: true,
+        clientsClaim: true,
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
         runtimeCaching: [
           {
