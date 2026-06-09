@@ -256,23 +256,6 @@ export default function FixturePage() {
   const [showAllDone, setShowAllDone] = useState(false);
   const prevPendingRef = useRef(null);
 
-  const pendingCount = useMemo(() => {
-    if (simulationMode) return 0;
-    return matches.filter(
-      (m) => m.status === 'upcoming' && !isMatchLocked(m) && !predictions[m.id]
-    ).length;
-  }, [matches, predictions, simulationMode]);
-
-  useEffect(() => {
-    if (simulationMode) return;
-    if (prevPendingRef.current != null && prevPendingRef.current > 0 && pendingCount === 0) {
-      setShowAllDone(true);
-      const t = setTimeout(() => setShowAllDone(false), 3000);
-      return () => clearTimeout(t);
-    }
-    prevPendingRef.current = pendingCount;
-  }, [pendingCount, simulationMode]);
-
   useEffect(() => {
     if (!currentUser) return;
 
@@ -307,9 +290,40 @@ export default function FixturePage() {
     return unsub;
   }, [currentUser, simulationMode]);
 
+  const visibleMatches = useMemo(() => {
+    const isRealTeam = (name) => name &&
+      !name.includes('Ganador') &&
+      !name.includes('Perdedor') &&
+      !name.includes('1º') &&
+      !name.includes('2º') &&
+      !name.includes('3º') &&
+      !name.includes('Grupo');
+    return matches.filter((match) => {
+      if (match.stage === 'group') return true;
+      return isRealTeam(match.homeTeam) && isRealTeam(match.awayTeam);
+    });
+  }, [matches]);
+
+  const pendingCount = useMemo(() => {
+    if (simulationMode) return 0;
+    return visibleMatches.filter(
+      (m) => m.status === 'upcoming' && !isMatchLocked(m) && !predictions[m.id]
+    ).length;
+  }, [visibleMatches, predictions, simulationMode]);
+
+  useEffect(() => {
+    if (simulationMode) return;
+    if (prevPendingRef.current != null && prevPendingRef.current > 0 && pendingCount === 0) {
+      setShowAllDone(true);
+      const t = setTimeout(() => setShowAllDone(false), 3000);
+      return () => clearTimeout(t);
+    }
+    prevPendingRef.current = pendingCount;
+  }, [pendingCount, simulationMode]);
+
   const dateKeys = useMemo(() => {
     const keys = new Set();
-    matches.forEach((m) => {
+    visibleMatches.forEach((m) => {
       const k = localDateKey(m.matchDate);
       if (k) keys.add(k);
     });
@@ -318,7 +332,7 @@ export default function FixturePage() {
       const [mb, db, yb] = b.split('/');
       return new Date(ya, ma - 1, da) - new Date(yb, mb - 1, db);
     });
-  }, [matches]);
+  }, [visibleMatches]);
 
   const todayKey = useMemo(() => getTodayKey(), []);
 
@@ -334,8 +348,8 @@ export default function FixturePage() {
 
   const dayMatches = useMemo(() => {
     if (!selectedDate) return [];
-    return matches.filter((m) => localDateKey(m.matchDate) === selectedDate);
-  }, [matches, selectedDate]);
+    return visibleMatches.filter((m) => localDateKey(m.matchDate) === selectedDate);
+  }, [visibleMatches, selectedDate]);
 
   useEffect(() => {
     if (navRef.current && dateKeys.length > 0) {
@@ -402,6 +416,10 @@ export default function FixturePage() {
               Ejecutá <code className="text-fifa-gold">npm run seed:fixture</code> con los
               emuladores activos.
             </p>
+          </div>
+        ) : visibleMatches.length === 0 ? (
+          <div className="fifa-card text-center py-12">
+            <p className="text-[#B8C5F0]">No hay partidos disponibles.</p>
           </div>
         ) : (
           <>
