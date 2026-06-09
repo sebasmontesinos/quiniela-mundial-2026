@@ -204,7 +204,11 @@ function MatchCard({ match, prediction, userId, onPredictionSaved, simulationMod
 }
 
 function localDateKey(value) {
-  const d = value?.toDate ? value.toDate() : new Date(value);
+  const d = value?.toDate
+    ? value.toDate()
+    : value?.seconds
+      ? new Date(value.seconds * 1000)
+      : new Date(value);
   if (isNaN(d)) return '';
   return new Intl.DateTimeFormat(undefined, {
     year: 'numeric', month: 'numeric', day: 'numeric'
@@ -319,19 +323,10 @@ export default function FixturePage() {
   const todayKey = useMemo(() => getTodayKey(), []);
 
   const initialDate = useMemo(() => {
-    if (dateKeys.length === 0) return null;
-    if (dateKeys.indexOf(todayKey) !== -1) return todayKey;
-    const today = new Date();
-    let best = dateKeys[0];
-    for (const k of dateKeys) {
-      const [m, d, y] = k.split('/');
-      if (new Date(y, m - 1, d) >= today) {
-        best = k;
-        break;
-      }
-    }
-    return best;
-  }, [dateKeys, todayKey]);
+    return dateKeys.length > 0 ? dateKeys[0] : null;
+  }, [dateKeys]);
+
+  const todayHasMatches = dateKeys.indexOf(todayKey) !== -1;
 
   if (selectedDate === null && initialDate !== null) {
     setSelectedDate(initialDate);
@@ -342,21 +337,14 @@ export default function FixturePage() {
     return matches.filter((m) => localDateKey(m.matchDate) === selectedDate);
   }, [matches, selectedDate]);
 
-  const handleGoToday = () => {
-    if (dateKeys.indexOf(todayKey) !== -1) {
-      setSelectedDate(todayKey);
-    } else {
-      const today = new Date();
-      let best = dateKeys[0];
-      for (const k of dateKeys) {
-        const [m, d, y] = k.split('/');
-        if (new Date(y, m - 1, d) >= today) {
-          best = k;
-          break;
-        }
-      }
-      setSelectedDate(best);
+  useEffect(() => {
+    if (navRef.current && dateKeys.length > 0) {
+      navRef.current.scrollLeft = 0;
     }
+  }, [dateKeys]);
+
+  const handleGoToday = () => {
+    setSelectedDate(todayKey);
   };
 
   return (
@@ -417,14 +405,25 @@ export default function FixturePage() {
           </div>
         ) : (
           <>
+            {!todayHasMatches && (
+              <div className="bg-[#1A3399]/40 border border-[#3E5FD9] rounded-lg px-4 py-4 mb-4 text-center">
+                <p className="text-base font-bold text-white mb-1">⚽ Hoy no hay partidos</p>
+                <p className="text-sm text-[#B8C5F0]">
+                  El Mundial arranca el {formatHeaderFromKey(dateKeys[0])}
+                </p>
+              </div>
+            )}
+
             <div className="flex items-center gap-1 mb-4 overflow-x-auto no-scrollbar snap-x" ref={navRef}>
-              <button
-                type="button"
-                onClick={handleGoToday}
-                className="flex-shrink-0 px-3 py-2 rounded-lg text-xs font-semibold bg-[#06B894] text-white hover:bg-emerald-500 transition-colors whitespace-nowrap"
-              >
-                HOY
-              </button>
+              {todayHasMatches && (
+                <button
+                  type="button"
+                  onClick={handleGoToday}
+                  className="flex-shrink-0 px-3 py-2 rounded-lg text-xs font-semibold bg-[#06B894] text-white hover:bg-emerald-500 transition-colors whitespace-nowrap"
+                >
+                  HOY
+                </button>
+              )}
               {dateKeys.map((key) => (
                 <button
                   key={key}
