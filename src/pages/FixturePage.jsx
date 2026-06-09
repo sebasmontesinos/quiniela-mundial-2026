@@ -212,7 +212,7 @@ function getMatchDate(match) {
 }
 
 function getLocalDateKey(match) {
-  return new Intl.DateTimeFormat('es', {
+  return new Intl.DateTimeFormat('en-CA', {
     timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     year: 'numeric', month: '2-digit', day: '2-digit'
   }).format(getMatchDate(match))
@@ -220,7 +220,7 @@ function getLocalDateKey(match) {
 
 function shortDateLabel(key) {
   if (!key) return '';
-  const [m, d, y] = key.split('/');
+  const [y, m, d] = key.split('/');
   const date = new Date(+y, +m - 1, +d);
   return new Intl.DateTimeFormat(undefined, {
     weekday: 'short', day: 'numeric', month: 'numeric'
@@ -229,7 +229,7 @@ function shortDateLabel(key) {
 
 function formatHeaderFromKey(key) {
   if (!key) return '';
-  const [m, d, y] = key.split('/');
+  const [y, m, d] = key.split('/');
   const date = new Date(+y, +m - 1, +d);
   return formatDateHeader(date);
 }
@@ -322,7 +322,7 @@ export default function FixturePage() {
   }, [visibleMatches])
 
   const todayKey = useMemo(() => {
-    return new Intl.DateTimeFormat('es', {
+    return new Intl.DateTimeFormat('en-CA', {
       timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       year: 'numeric', month: '2-digit', day: '2-digit'
     }).format(new Date())
