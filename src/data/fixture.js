@@ -59,20 +59,91 @@ const GROUP_PAIRINGS = [
   [1, 2],
 ];
 
-/* Días de junio para cada fecha de grupo (base = 11 de junio) */
-const GROUP_SCHEDULE = {
-  A: { dates: [11, 18, 24], slots: [[19, 20], [17, 20], [17, 20]] },
-  B: { dates: [11, 17, 23], slots: [[23, 2], [17, 20], [17, 20]] },
-  C: { dates: [12, 17, 23], slots: [[17, 20], [23, 2], [23, 2]] },
-  D: { dates: [12, 18, 24], slots: [[17, 20], [17, 20], [17, 20]] },
-  E: { dates: [13, 19, 25], slots: [[17, 20], [17, 20], [17, 20]] },
-  F: { dates: [13, 19, 25], slots: [[23, 2], [17, 20], [17, 20]] },
-  G: { dates: [14, 20, 26], slots: [[17, 20], [23, 2], [17, 20]] },
-  H: { dates: [14, 20, 26], slots: [[17, 20], [17, 20], [23, 2]] },
-  I: { dates: [15, 21, 27], slots: [[23, 2], [17, 20], [17, 20]] },
-  J: { dates: [15, 21, 27], slots: [[17, 20], [17, 20], [17, 20]] },
-  K: { dates: [16, 22, 27], slots: [[17, 20], [23, 2], [17, 20]] },
-  L: { dates: [16, 22, 27], slots: [[17, 20], [17, 20], [23, 2]] },
+const GROUP_DATES = {
+  /* Group A */
+  'GS_A_1': new Date('2026-06-11T19:00:00Z'),
+  'GS_A_2': new Date('2026-06-12T02:00:00Z'),
+  'GS_A_3': new Date('2026-06-19T01:00:00Z'),
+  'GS_A_4': new Date('2026-06-18T16:00:00Z'),
+  'GS_A_5': new Date('2026-06-25T01:00:00Z'),
+  'GS_A_6': new Date('2026-06-25T01:00:00Z'),
+  /* Group B */
+  'GS_B_1': new Date('2026-06-12T19:00:00Z'),
+  'GS_B_2': new Date('2026-06-13T19:00:00Z'),
+  'GS_B_3': new Date('2026-06-18T22:00:00Z'),
+  'GS_B_4': new Date('2026-06-18T19:00:00Z'),
+  'GS_B_5': new Date('2026-06-24T19:00:00Z'),
+  'GS_B_6': new Date('2026-06-24T19:00:00Z'),
+  /* Group C */
+  'GS_C_1': new Date('2026-06-13T22:00:00Z'),
+  'GS_C_2': new Date('2026-06-14T01:00:00Z'),
+  'GS_C_3': new Date('2026-06-19T22:00:00Z'),
+  'GS_C_4': new Date('2026-06-20T00:30:00Z'),
+  'GS_C_5': new Date('2026-06-24T22:00:00Z'),
+  'GS_C_6': new Date('2026-06-24T22:00:00Z'),
+  /* Group D */
+  'GS_D_1': new Date('2026-06-13T01:00:00Z'),
+  'GS_D_2': new Date('2026-06-14T04:00:00Z'),
+  'GS_D_3': new Date('2026-06-19T19:00:00Z'),
+  'GS_D_4': new Date('2026-06-20T03:00:00Z'),
+  'GS_D_5': new Date('2026-06-26T02:00:00Z'),
+  'GS_D_6': new Date('2026-06-26T02:00:00Z'),
+  /* Group E */
+  'GS_E_1': new Date('2026-06-14T17:00:00Z'),
+  'GS_E_2': new Date('2026-06-14T23:00:00Z'),
+  'GS_E_3': new Date('2026-06-20T20:00:00Z'),
+  'GS_E_4': new Date('2026-06-21T00:00:00Z'),
+  'GS_E_5': new Date('2026-06-25T20:00:00Z'),
+  'GS_E_6': new Date('2026-06-25T20:00:00Z'),
+  /* Group F */
+  'GS_F_1': new Date('2026-06-14T20:00:00Z'),
+  'GS_F_2': new Date('2026-06-15T02:00:00Z'),
+  'GS_F_3': new Date('2026-06-20T17:00:00Z'),
+  'GS_F_4': new Date('2026-06-21T04:00:00Z'),
+  'GS_F_5': new Date('2026-06-25T23:00:00Z'),
+  'GS_F_6': new Date('2026-06-25T23:00:00Z'),
+  /* Group G */
+  'GS_G_1': new Date('2026-06-15T19:00:00Z'),
+  'GS_G_2': new Date('2026-06-16T01:00:00Z'),
+  'GS_G_3': new Date('2026-06-21T19:00:00Z'),
+  'GS_G_4': new Date('2026-06-22T01:00:00Z'),
+  'GS_G_5': new Date('2026-06-27T03:00:00Z'),
+  'GS_G_6': new Date('2026-06-27T03:00:00Z'),
+  /* Group H */
+  'GS_H_1': new Date('2026-06-15T16:00:00Z'),
+  'GS_H_2': new Date('2026-06-15T22:00:00Z'),
+  'GS_H_3': new Date('2026-06-21T16:00:00Z'),
+  'GS_H_4': new Date('2026-06-21T22:00:00Z'),
+  'GS_H_5': new Date('2026-06-27T00:00:00Z'),
+  'GS_H_6': new Date('2026-06-27T00:00:00Z'),
+  /* Group I */
+  'GS_I_1': new Date('2026-06-16T19:00:00Z'),
+  'GS_I_2': new Date('2026-06-16T22:00:00Z'),
+  'GS_I_3': new Date('2026-06-22T21:00:00Z'),
+  'GS_I_4': new Date('2026-06-23T00:00:00Z'),
+  'GS_I_5': new Date('2026-06-26T19:00:00Z'),
+  'GS_I_6': new Date('2026-06-26T19:00:00Z'),
+  /* Group J */
+  'GS_J_1': new Date('2026-06-17T01:00:00Z'),
+  'GS_J_2': new Date('2026-06-17T04:00:00Z'),
+  'GS_J_3': new Date('2026-06-22T17:00:00Z'),
+  'GS_J_4': new Date('2026-06-23T03:00:00Z'),
+  'GS_J_5': new Date('2026-06-28T02:00:00Z'),
+  'GS_J_6': new Date('2026-06-28T02:00:00Z'),
+  /* Group K */
+  'GS_K_1': new Date('2026-06-17T17:00:00Z'),
+  'GS_K_2': new Date('2026-06-18T02:00:00Z'),
+  'GS_K_3': new Date('2026-06-23T17:00:00Z'),
+  'GS_K_4': new Date('2026-06-24T02:00:00Z'),
+  'GS_K_5': new Date('2026-06-27T23:30:00Z'),
+  'GS_K_6': new Date('2026-06-27T23:30:00Z'),
+  /* Group L */
+  'GS_L_1': new Date('2026-06-17T20:00:00Z'),
+  'GS_L_2': new Date('2026-06-17T23:00:00Z'),
+  'GS_L_3': new Date('2026-06-23T20:00:00Z'),
+  'GS_L_4': new Date('2026-06-23T23:00:00Z'),
+  'GS_L_5': new Date('2026-06-27T21:00:00Z'),
+  'GS_L_6': new Date('2026-06-27T21:00:00Z'),
 };
 
 function fmtDate(month, day, hour, minute = 0) {
@@ -89,24 +160,12 @@ function buildGroupMatches() {
 
   GROUP_LETTERS.forEach((group, gIndex) => {
     const teams = GROUPS[group];
-    const schedule = GROUP_SCHEDULE[group];
 
     GROUP_PAIRINGS.forEach((pair, matchIdx) => {
-      const md = Math.floor(matchIdx / 2);
-      const matchInDay = matchIdx % 2;
-      const day = schedule.dates[md];
-      const hour = schedule.slots[md][matchInDay];
-
-      let matchDay = day;
-      if (hour === 2) {
-        matchDay = day + 1;
-      }
-
-      const matchDate = fmtDate(6, matchDay, hour);
+      const matchId = `GS_${group}_${matchIdx + 1}`;
+      const matchDate = GROUP_DATES[matchId];
 
       let venue;
-      const matchId = `GS_${group}_${matchIdx + 1}`;
-
       if (group === 'A') {
         if (matchIdx === 0) venue = VENUES[0];
         else if (matchIdx === 2) venue = VENUES[1];
