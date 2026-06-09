@@ -204,23 +204,32 @@ function MatchCard({ match, prediction, userId, onPredictionSaved, simulationMod
 }
 
 function getMatchDate(match) {
-  const md = match?.matchDate
-  if (!md) return new Date()
-  if (md.toDate) return md.toDate()
-  if (md.seconds) return new Date(md.seconds * 1000)
-  return new Date(md)
+  try {
+    const md = match?.matchDate
+    if (!md) return null
+    let d
+    if (md.toDate) d = md.toDate()
+    else if (md.seconds) d = new Date(md.seconds * 1000)
+    else d = new Date(md)
+    if (isNaN(d.getTime())) return null
+    return d
+  } catch {
+    return null
+  }
 }
 
 function getLocalDateKey(match) {
-  return new Intl.DateTimeFormat('en-CA', {
+  const d = getMatchDate(match)
+  if (!d) return null
+  return new Intl.DateTimeFormat('es', {
     timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     year: 'numeric', month: '2-digit', day: '2-digit'
-  }).format(getMatchDate(match))
+  }).format(d)
 }
 
 function shortDateLabel(key) {
   if (!key) return '';
-  const [y, m, d] = key.split('/');
+  const [d, m, y] = key.split('/');
   const date = new Date(+y, +m - 1, +d);
   return new Intl.DateTimeFormat(undefined, {
     weekday: 'short', day: 'numeric', month: 'numeric'
@@ -229,7 +238,7 @@ function shortDateLabel(key) {
 
 function formatHeaderFromKey(key) {
   if (!key) return '';
-  const [y, m, d] = key.split('/');
+  const [d, m, y] = key.split('/');
   const date = new Date(+y, +m - 1, +d);
   return formatDateHeader(date);
 }
@@ -289,11 +298,12 @@ export default function FixturePage() {
 
   const visibleMatches = useMemo(() => {
     return matches.filter(match => {
+      if (!getMatchDate(match)) return false
       if (match.stage === 'group') return true
       const isReal = (name) => {
         if (!name) return false
-        const placeholders = ['Ganador', 'Perdedor', '1º', '2º', '3º',
-                             'Grupo', 'Winner', 'Runner', 'Best']
+        const placeholders = ['Ganador', 'Perdedor', '1º', '2º',
+          '3º', 'Grupo', 'Winner', 'Runner', 'Best']
         return !placeholders.some(p => name.includes(p))
       }
       return isReal(match.homeTeam) && isReal(match.awayTeam)
@@ -318,7 +328,9 @@ export default function FixturePage() {
   }, [pendingCount, simulationMode]);
 
   const dateKeys = useMemo(() => {
-    return [...new Set(visibleMatches.map(getLocalDateKey))].sort()
+    return [...new Set(
+      visibleMatches.map(getLocalDateKey).filter(Boolean)
+    )].sort()
   }, [visibleMatches])
 
   const todayKey = useMemo(() => {
@@ -354,17 +366,6 @@ export default function FixturePage() {
   const handleGoToday = () => {
     setSelectedDate(todayKey);
   };
-
-  console.log('DEBUG visibleMatches count:', visibleMatches.length)
-  console.log('DEBUG first 3 matches:', visibleMatches.slice(0,3).map(m => ({
-    id: m.id,
-    stage: m.stage,
-    rawDate: m.matchDate,
-    parsedDate: m.matchDate?.toDate ? m.matchDate.toDate().toISOString() : String(m.matchDate)
-  })))
-  console.log('DEBUG dateKeys:', dateKeys.slice(0,5))
-  console.log('DEBUG todayKey:', todayKey)
-  console.log('DEBUG selectedDate:', selectedDate)
 
   return (
     <div className="min-h-screen bg-fifa-gradient text-[#F8FAFC]">
