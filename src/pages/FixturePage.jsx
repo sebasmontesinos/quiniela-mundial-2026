@@ -322,7 +322,7 @@ export default function FixturePage() {
   }, [visibleMatches])
 
   const todayKey = useMemo(() => {
-    return new Intl.DateTimeFormat('en-CA', {
+    return new Intl.DateTimeFormat('es', {
       timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       year: 'numeric', month: '2-digit', day: '2-digit'
     }).format(new Date())
@@ -354,6 +354,17 @@ export default function FixturePage() {
   const handleGoToday = () => {
     setSelectedDate(todayKey);
   };
+
+  console.log('DEBUG visibleMatches count:', visibleMatches.length)
+  console.log('DEBUG first 3 matches:', visibleMatches.slice(0,3).map(m => ({
+    id: m.id,
+    stage: m.stage,
+    rawDate: m.matchDate,
+    parsedDate: m.matchDate?.toDate ? m.matchDate.toDate().toISOString() : String(m.matchDate)
+  })))
+  console.log('DEBUG dateKeys:', dateKeys.slice(0,5))
+  console.log('DEBUG todayKey:', todayKey)
+  console.log('DEBUG selectedDate:', selectedDate)
 
   return (
     <div className="min-h-screen bg-fifa-gradient text-[#F8FAFC]">
