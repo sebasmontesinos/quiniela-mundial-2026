@@ -221,15 +221,20 @@ function getMatchDate(match) {
 function getLocalDateKey(match) {
   const d = getMatchDate(match)
   if (!d) return null
-  return new Intl.DateTimeFormat('es', {
-    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: tz,
     year: 'numeric', month: '2-digit', day: '2-digit'
-  }).format(d)
+  }).formatToParts(d)
+  const y = parts.find(p => p.type === 'year').value
+  const m = parts.find(p => p.type === 'month').value
+  const day = parts.find(p => p.type === 'day').value
+  return y + '-' + m + '-' + day
 }
 
 function shortDateLabel(key) {
   if (!key) return '';
-  const [d, m, y] = key.split('/');
+  const [y, m, d] = key.split('-');
   const date = new Date(+y, +m - 1, +d);
   return new Intl.DateTimeFormat(undefined, {
     weekday: 'short', day: 'numeric', month: 'numeric'
@@ -238,7 +243,7 @@ function shortDateLabel(key) {
 
 function formatHeaderFromKey(key) {
   if (!key) return '';
-  const [d, m, y] = key.split('/');
+  const [y, m, d] = key.split('-');
   const date = new Date(+y, +m - 1, +d);
   return formatDateHeader(date);
 }
@@ -334,10 +339,15 @@ export default function FixturePage() {
   }, [visibleMatches])
 
   const todayKey = useMemo(() => {
-    return new Intl.DateTimeFormat('es', {
-      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+    const parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: tz,
       year: 'numeric', month: '2-digit', day: '2-digit'
-    }).format(new Date())
+    }).formatToParts(new Date())
+    const y = parts.find(p => p.type === 'year').value
+    const m = parts.find(p => p.type === 'month').value
+    const d = parts.find(p => p.type === 'day').value
+    return y + '-' + m + '-' + d
   }, [])
 
   const initialDate = useMemo(() => {
