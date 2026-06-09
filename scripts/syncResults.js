@@ -50,9 +50,15 @@ export async function syncResults(db) {
   let scored = 0;
 
   /* ---- 1. Live & recent matches ---- */
-  const liveRecent = await fetchLiveAndRecentMatches();
+  let liveRecent;
+  try {
+    liveRecent = await fetchLiveAndRecentMatches();
+  } catch (err) {
+    console.error(`[ERROR] [${new Date().toISOString()}] Error al consultar API football-data.org (partidos en vivo/recientes): ${err.message}`);
+    liveRecent = [];
+  }
   if (liveRecent.length === 0) {
-    emit('No se encontraron partidos en vivo o recientes desde la API.');
+    console.error(`[ERROR] [${new Date().toISOString()}] La API de football-data.org devolvió 0 partidos en vivo o recientes.`);
   }
 
   for (const apiMatch of liveRecent) {
@@ -119,7 +125,16 @@ export async function syncResults(db) {
   }
 
   /* ---- 2. Upcoming matches — lock those starting within 5 min ---- */
-  const upcoming = await fetchUpcomingMatches();
+  let upcoming;
+  try {
+    upcoming = await fetchUpcomingMatches();
+  } catch (err) {
+    console.error(`[ERROR] [${new Date().toISOString()}] Error al consultar API football-data.org (partidos próximos): ${err.message}`);
+    upcoming = [];
+  }
+  if (upcoming.length === 0) {
+    console.error(`[ERROR] [${new Date().toISOString()}] La API de football-data.org devolvió 0 partidos próximos.`);
+  }
   const now = new Date();
   const fiveMinFromNow = new Date(now.getTime() + 5 * 60 * 1000);
 

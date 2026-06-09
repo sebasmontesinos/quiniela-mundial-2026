@@ -17,6 +17,7 @@ import {
 import { calculatePoints } from '../services/scoring';
 import { STAGE_LABELS, STAGE_ORDER } from '../data/fixture';
 import { TableSkeleton } from '../components/Skeleton';
+import { useToast } from '../contexts/ToastContext';
 
 function Avatar({ user }) {
   if (user.photoURL) {
@@ -103,6 +104,7 @@ function generateWhatsAppText(match, rows, totalPot, leader) {
 
 export default function StandingsPage() {
   const { currentUser, simulationMode } = useAuth();
+  const toast = useToast();
   const [users, setUsers] = useState([]);
   const [predictions, setPredictions] = useState([]);
   const [matches, setMatches] = useState([]);
@@ -119,6 +121,7 @@ export default function StandingsPage() {
         if (!cancelled) setUsers(allUsers);
       } catch (err) {
         console.error('Error fetching users:', err);
+        toast.error('Error al cargar usuarios.');
       }
     })();
     return () => { cancelled = true; };
@@ -136,6 +139,7 @@ export default function StandingsPage() {
       },
       (err) => {
         console.error('Error subscribing to predictions:', err);
+        toast.error('Error al suscribirse a predicciones.');
         setLoading(false);
       }
     );
@@ -163,7 +167,10 @@ export default function StandingsPage() {
           });
         }
       },
-      (err) => console.error('Error subscribing to matches:', err)
+      (err) => {
+        console.error('Error subscribing to matches:', err);
+        toast.error('Error al suscribirse a partidos.');
+      }
     );
     return () => unsub();
   }, [simulationMode]);
@@ -176,7 +183,10 @@ export default function StandingsPage() {
       .then((data) => {
         if (!cancelled) setMatchPredictions(data);
       })
-      .catch((err) => console.error('Error fetching match predictions:', err));
+      .catch((err) => {
+        console.error('Error fetching match predictions:', err);
+        toast.error('Error al cargar predicciones del partido.');
+      });
     return () => { cancelled = true; };
   }, [selectedMatchId, simulationMode]);
 

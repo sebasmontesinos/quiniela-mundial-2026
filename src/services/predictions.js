@@ -46,10 +46,6 @@ export async function savePrediction(userId, matchId, homeScore, awayScore) {
   const predictedAwayScore = Number(awayScore);
   const predictedWinner = deriveWinner(predictedHomeScore, predictedAwayScore);
 
-  console.log(
-    `[savePrediction] uid=${userId} matchId=${matchId} docId=${id} exists=${existing.exists()} action=${existing.exists() ? 'update' : 'create'}`
-  );
-
   try {
     if (existing.exists()) {
       await updateDoc(ref, {

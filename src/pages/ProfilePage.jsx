@@ -5,6 +5,7 @@ import { fetchAllMatches } from '../services/matches';
 import { fetchUserPredictions } from '../services/predictions';
 import { formatMatchDate, formatDateHeader } from '../utils/dateUtils.js';
 import { TeamFlag } from '../data/teamCrests.jsx';
+import { useToast } from '../contexts/ToastContext';
 
 function TeamLabel({ teamName }) {
   return (
@@ -39,6 +40,7 @@ function PointsBadge({ points, matchFinished }) {
 export default function ProfilePage() {
   const { currentUser, userProfile, status } = useAuth();
   const navigate = useNavigate();
+  const toast = useToast();
   const [matches, setMatches] = useState([]);
   const [predictions, setPredictions] = useState({});
   const [loading, setLoading] = useState(true);
@@ -57,6 +59,7 @@ export default function ProfilePage() {
         }
       } catch (err) {
         console.error('Error loading profile data:', err);
+        toast.error('Error al cargar datos del perfil.');
       } finally {
         if (!cancelled) setLoading(false);
       }
