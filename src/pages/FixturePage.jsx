@@ -18,20 +18,7 @@ import { CardSkeleton } from '../components/Skeleton';
 import Countdown from '../components/Countdown';
 import { TeamFlag } from '../data/teamCrests.jsx';
 
-function isMatchToday(match) {
-  const d = getMatchDate(match);
-  if (!d) return false;
-  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  const parts = (when) =>
-    new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(when);
-  const toKey = (parts) =>
-    parts.find((p) => p.type === 'year').value + '-' +
-    parts.find((p) => p.type === 'month').value + '-' +
-    parts.find((p) => p.type === 'day').value;
-  return toKey(parts(d)) === toKey(parts(new Date()));
-}
-
-function MatchStatusBadge({ match, locked, isToday }) {
+function MatchStatusBadge({ match, locked, isProximo }) {
   if (match.status === 'finished') {
     return (
       <span className="text-xs font-semibold px-3 py-1 rounded-full bg-[#4A5568]/60 text-[#CBD5E0] border border-[#4A5568]">
@@ -53,7 +40,7 @@ function MatchStatusBadge({ match, locked, isToday }) {
       </span>
     );
   }
-  if (isToday) {
+  if (isProximo) {
     return (
       <span className="text-xs font-semibold px-3 py-1 rounded-[20px] bg-[#06B894] text-white border border-[#06B894]">
         Próximo
@@ -149,11 +136,12 @@ function PredictionForm({ match, prediction, userId, onSaved, simulationMode }) 
   );
 }
 
-function MatchCard({ match, prediction, userId, onPredictionSaved, simulationMode, isAdmin }) {
+function MatchCard({ match, prediction, userId, onPredictionSaved, simulationMode, isAdmin, selectedDate }) {
   const locked = simulationMode ? match.locked : isMatchLocked(match);
   const canPredict =
     match.status === 'upcoming' && !locked && userId && !isAdmin;
   const showResult = match.status === 'finished' && match.homeScore != null;
+  const isProximo = match.status === 'upcoming' && !locked && getLocalDateKey(match) === selectedDate;
 
   return (
     <div className="fifa-card-gold-left p-4 hover:border-fifa-gold/60 transition-all">
@@ -176,7 +164,7 @@ function MatchCard({ match, prediction, userId, onPredictionSaved, simulationMod
             </span>
           </p>
         </div>
-        <MatchStatusBadge match={match} locked={locked} isToday={isMatchToday(match)} />
+        <MatchStatusBadge match={match} locked={locked} isProximo={isProximo} />
       </div>
 
       <div className="text-xs text-[#B8C5F0] space-y-1">
@@ -518,6 +506,7 @@ export default function FixturePage() {
                         onPredictionSaved={reloadPredictions}
                         simulationMode={simulationMode}
                         isAdmin={isAdmin}
+                        selectedDate={selectedDate}
                       />
                     ))}
                   </div>
