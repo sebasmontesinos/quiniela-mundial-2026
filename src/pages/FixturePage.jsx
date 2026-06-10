@@ -49,7 +49,7 @@ function MatchStatusBadge({ match, locked, isToday: isTodayMatch, isTomorrow }) 
   }
   if (isTomorrow) {
     return (
-      <span className="text-xs font-semibold px-3 py-1 rounded-[20px] bg-fifa-gold text-[#0A0E1A] border border-fifa-gold">
+      <span className="text-xs font-semibold px-3 py-1 rounded-[20px] bg-yellow-400 text-gray-900 border border-yellow-400">
         Próximo
       </span>
     );
