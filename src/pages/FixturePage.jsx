@@ -129,10 +129,10 @@ function PredictionForm({ match, prediction, userId, onSaved, simulationMode }) 
   );
 }
 
-function MatchCard({ match, prediction, userId, onPredictionSaved, simulationMode }) {
+function MatchCard({ match, prediction, userId, onPredictionSaved, simulationMode, isAdmin }) {
   const locked = simulationMode ? match.locked : isMatchLocked(match);
   const canPredict =
-    match.status === 'upcoming' && !locked && userId;
+    match.status === 'upcoming' && !locked && userId && !isAdmin;
   const showResult = match.status === 'finished' && match.homeScore != null;
 
   return (
@@ -249,7 +249,7 @@ function formatHeaderFromKey(key) {
 }
 
 export default function FixturePage() {
-  const { currentUser, simulationMode } = useAuth();
+  const { currentUser, simulationMode, isAdmin } = useAuth();
   const [matches, setMatches] = useState([]);
   const [predictions, setPredictions] = useState({});
   const [loading, setLoading] = useState(true);
@@ -497,6 +497,7 @@ export default function FixturePage() {
                         userId={currentUser?.uid}
                         onPredictionSaved={reloadPredictions}
                         simulationMode={simulationMode}
+                        isAdmin={isAdmin}
                       />
                     ))}
                   </div>
