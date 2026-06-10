@@ -17,7 +17,6 @@ import { formatMatchTime, formatDateHeader } from '../utils/dateUtils.js';
 import { CardSkeleton } from '../components/Skeleton';
 import Countdown from '../components/Countdown';
 import { TeamFlag } from '../data/teamCrests.jsx';
-import { useToast } from '../contexts/ToastContext';
 
 function MatchStatusBadge({ match, locked }) {
   if (match.status === 'finished') {
@@ -61,6 +60,10 @@ function PredictionForm({ match, prediction, userId, onSaved, simulationMode }) 
     const formData = new FormData(e.currentTarget);
     const home = Number(formData.get('homeScore'));
     const away = Number(formData.get('awayScore'));
+
+    console.log(
+      `[PredictionForm] save: uid=${userId} matchId=${match.id} home=${home} away=${away} simulationMode=${simulationMode}`
+    );
 
     try {
       setSaving(true);
@@ -247,7 +250,6 @@ function formatHeaderFromKey(key) {
 
 export default function FixturePage() {
   const { currentUser, simulationMode } = useAuth();
-  const toast = useToast();
   const [matches, setMatches] = useState([]);
   const [predictions, setPredictions] = useState({});
   const [loading, setLoading] = useState(true);
@@ -287,7 +289,6 @@ export default function FixturePage() {
           setPredictions(map);
         } catch (predErr) {
           console.error(predErr);
-          toast.error('Error al recargar predicciones.');
         }
       },
       (err) => {
