@@ -36,4 +36,4 @@ jobs:
           echo "FOOTBALL_DATA_COMPETITION_CODE=WC" >> .env
 
       - name: Run sync script
-        run: node scripts/syncResults.js
+        run: node --env-file=.env scripts/syncResults.js
