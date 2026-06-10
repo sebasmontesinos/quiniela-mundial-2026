@@ -18,7 +18,7 @@ import { CardSkeleton } from '../components/Skeleton';
 import Countdown from '../components/Countdown';
 import { TeamFlag } from '../data/teamCrests.jsx';
 
-function MatchStatusBadge({ match, locked, isProximo }) {
+function MatchStatusBadge({ match, locked, isToday: isTodayMatch, isTomorrow }) {
   if (match.status === 'finished') {
     return (
       <span className="text-xs font-semibold px-3 py-1 rounded-full bg-[#4A5568]/60 text-[#CBD5E0] border border-[#4A5568]">
@@ -40,9 +40,16 @@ function MatchStatusBadge({ match, locked, isProximo }) {
       </span>
     );
   }
-  if (isProximo) {
+  if (isTodayMatch) {
     return (
       <span className="text-xs font-semibold px-3 py-1 rounded-[20px] bg-[#06B894] text-white border border-[#06B894]">
+        Hoy
+      </span>
+    );
+  }
+  if (isTomorrow) {
+    return (
+      <span className="text-xs font-semibold px-3 py-1 rounded-[20px] bg-fifa-gold text-[#0A0E1A] border border-fifa-gold">
         Próximo
       </span>
     );
@@ -136,12 +143,20 @@ function PredictionForm({ match, prediction, userId, onSaved, simulationMode }) 
   );
 }
 
-function MatchCard({ match, prediction, userId, onPredictionSaved, simulationMode, isAdmin, selectedDate }) {
+function addDays(dateKey, n) {
+  const d = new Date(dateKey + 'T12:00:00');
+  d.setDate(d.getDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+
+function MatchCard({ match, prediction, userId, onPredictionSaved, simulationMode, isAdmin, todayKey }) {
   const locked = simulationMode ? match.locked : isMatchLocked(match);
   const canPredict =
     match.status === 'upcoming' && !locked && userId && !isAdmin;
   const showResult = match.status === 'finished' && match.homeScore != null;
-  const isProximo = match.status === 'upcoming' && !locked && getLocalDateKey(match) === selectedDate;
+  const matchKey = getLocalDateKey(match);
+  const isTodayMatch = match.status === 'upcoming' && !locked && matchKey === todayKey;
+  const isTomorrow = match.status === 'upcoming' && !locked && matchKey === addDays(todayKey, 1);
 
   return (
     <div className="fifa-card-gold-left p-4 hover:border-fifa-gold/60 transition-all">
@@ -164,7 +179,7 @@ function MatchCard({ match, prediction, userId, onPredictionSaved, simulationMod
             </span>
           </p>
         </div>
-        <MatchStatusBadge match={match} locked={locked} isProximo={isProximo} />
+        <MatchStatusBadge match={match} locked={locked} isToday={isTodayMatch} isTomorrow={isTomorrow} />
       </div>
 
       <div className="text-xs text-[#B8C5F0] space-y-1">
@@ -506,7 +521,7 @@ export default function FixturePage() {
                         onPredictionSaved={reloadPredictions}
                         simulationMode={simulationMode}
                         isAdmin={isAdmin}
-                        selectedDate={selectedDate}
+                        todayKey={todayKey}
                       />
                     ))}
                   </div>
