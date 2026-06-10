@@ -110,7 +110,8 @@ export function AuthProvider({ children }) {
         setSimulationMode(config?.simulationMode ?? false);
         setSimulationLoading(false);
       },
-      () => {
+      (error) => {
+        console.error('subscribeSimulationConfig error:', error.code, error.message);
         setSimulationMode(false);
         setSimulationLoading(false);
       }

@@ -113,10 +113,11 @@ service cloud.firestore {
 
     // ── /predictions — real user predictions ──────────────
     match /predictions/{predictionId} {
-      // Read own predictions, or admin reads all
+      // Any active user or admin can read all predictions (leaderboard)
       allow read: if request.auth != null
         && (
-          resource.data.get('userId', '') == request.auth.uid
+          get(/databases/$(database)/documents/users/$(request.auth.uid))
+              .data.get('status', '') == 'active'
           || get(/databases/$(database)/documents/users/$(request.auth.uid))
               .data.get('isAdmin', false) == true
         );
@@ -197,16 +198,13 @@ service cloud.firestore {
 
     // ── /sim_predictions — simulated prediction points ─────
     match /sim_predictions/{predictionId} {
-      // Read own predictions, or active player/admin reads all
+      // Any active user or admin can read all sim predictions (leaderboard)
       allow read: if request.auth != null
         && (
-          resource.data.get('userId', '') == request.auth.uid
-          || (
-            get(/databases/$(database)/documents/users/$(request.auth.uid))
-                .data.get('status', '') == 'active'
-            || get(/databases/$(database)/documents/users/$(request.auth.uid))
-                .data.get('isAdmin', false) == true
-          )
+          get(/databases/$(database)/documents/users/$(request.auth.uid))
+              .data.get('status', '') == 'active'
+          || get(/databases/$(database)/documents/users/$(request.auth.uid))
+              .data.get('isAdmin', false) == true
         );
 
       // Active player creates own sim prediction for an unlocked sim match
