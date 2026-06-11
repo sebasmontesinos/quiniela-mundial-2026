@@ -150,7 +150,12 @@ export async function syncResults(db) {
 /*  Standalone entry point                                             */
 /* ------------------------------------------------------------------ */
 export async function main() {
-  const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
+  const rawServiceAccount = process.env.FIREBASE_SERVICE_ACCOUNT_JSON || '{}';
+  const serviceAccount = JSON.parse(
+    rawServiceAccount.startsWith("'")
+      ? rawServiceAccount.slice(1, -1)
+      : rawServiceAccount
+  );
 
   if (!admin.apps.length) {
     admin.initializeApp({
