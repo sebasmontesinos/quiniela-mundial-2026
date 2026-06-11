@@ -1,7 +1,5 @@
 import admin from 'firebase-admin';
-import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
 import {
   fetchLiveAndRecentMatches,
   fetchUpcomingMatches,
@@ -152,10 +150,7 @@ export async function syncResults(db) {
 /*  Standalone entry point                                             */
 /* ------------------------------------------------------------------ */
 export async function main() {
-  const __dirname = dirname(fileURLToPath(import.meta.url));
-  const serviceAccount = JSON.parse(
-    readFileSync(join(__dirname, '../serviceAccount.json'), 'utf8')
-  );
+  const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
 
   if (!admin.apps.length) {
     admin.initializeApp({
