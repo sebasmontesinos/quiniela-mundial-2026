@@ -39,16 +39,16 @@ function normalizeMatch(apiMatch) {
 }
 
 export async function fetchLiveAndRecentMatches() {
-  const data = await apiFetch(
-    `/competitions/${COMPETITION_CODE}/matches?status=IN_PLAY,PAUSED,FINISHED`
-  );
+  const endpoint = `/competitions/${COMPETITION_CODE}/matches?status=IN_PLAY,PAUSED,FINISHED`;
+  console.log(`[footballApi] GET ${API_BASE}${endpoint}`);
+  const data = await apiFetch(endpoint);
   return (data.matches || []).map(normalizeMatch);
 }
 
 export async function fetchUpcomingMatches() {
-  const data = await apiFetch(
-    `/competitions/${COMPETITION_CODE}/matches?status=SCHEDULED,TIMED`
-  );
+  const endpoint = `/competitions/${COMPETITION_CODE}/matches?status=SCHEDULED,TIMED`;
+  console.log(`[footballApi] GET ${API_BASE}${endpoint}`);
+  const data = await apiFetch(endpoint);
   return (data.matches || []).map(normalizeMatch);
 }
 
