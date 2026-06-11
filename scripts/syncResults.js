@@ -1,16 +1,7 @@
+import admin from 'firebase-admin';
+import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
-import {
-  collection,
-  getDocs,
-  query,
-  where,
-  doc,
-  updateDoc,
-  writeBatch,
-  getFirestore,
-  connectFirestoreEmulator,
-} from 'firebase/firestore';
-import { initializeApp, getApps } from 'firebase/app';
+import { dirname, join } from 'path';
 import {
   fetchLiveAndRecentMatches,
   fetchUpcomingMatches,
@@ -29,7 +20,7 @@ export async function syncResults(db) {
   }
 
   /* ---- fetch all Firestore matches ---- */
-  const matchSnap = await getDocs(collection(db, 'matches'));
+  const matchSnap = await db.collection('matches').get();
   const firestoreMatches = matchSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
 
   if (firestoreMatches.length === 0) {
@@ -71,7 +62,7 @@ export async function syncResults(db) {
     const isLive = apiMatch.status === 'IN_PLAY' || apiMatch.status === 'PAUSED';
 
     if (isLive && !fsMatch.locked) {
-      await updateDoc(doc(db, 'matches', fsMatch.id), {
+      await db.collection('matches').doc(fsMatch.id).update({
         locked: true,
         status: 'live',
       });
@@ -89,7 +80,7 @@ export async function syncResults(db) {
         continue;
       }
 
-      await updateDoc(doc(db, 'matches', fsMatch.id), {
+      await db.collection('matches').doc(fsMatch.id).update({
         homeScore,
         awayScore,
         status: 'finished',
@@ -99,22 +90,20 @@ export async function syncResults(db) {
       updated++;
 
       /* score predictions for this match */
-      const predSnap = await getDocs(
-        query(collection(db, 'predictions'), where('matchId', '==', fsMatch.id))
-      );
+      const predSnap = await db.collection('predictions').where('matchId', '==', fsMatch.id).get();
       if (predSnap.empty) {
         emit(`     ↦ Sin predicciones que puntuar.`);
         continue;
       }
 
       const matchForCalc = { homeScore, awayScore };
-      const batch = writeBatch(db);
+      const batch = db.batch();
       let batchCount = 0;
 
       predSnap.docs.forEach((pd) => {
         const data = pd.data();
         const points = calculatePoints(data, matchForCalc);
-        batch.update(doc(db, 'predictions', pd.id), { points });
+        batch.update(db.collection('predictions').doc(pd.id), { points });
         batchCount++;
         scored++;
       });
@@ -147,7 +136,7 @@ export async function syncResults(db) {
       if (!fsMatch) continue;
       if (fsMatch.locked) continue;
 
-      await updateDoc(doc(db, 'matches', fsMatch.id), {
+      await db.collection('matches').doc(fsMatch.id).update({
         locked: true,
       });
       emit(`  🔒 Bloqueado (próximo 5 min): ${fsMatch.homeTeam} vs ${fsMatch.awayTeam}`);
@@ -163,29 +152,17 @@ export async function syncResults(db) {
 /*  Standalone entry point                                             */
 /* ------------------------------------------------------------------ */
 export async function main() {
-  const firebaseConfig = {
-    apiKey: process.env.VITE_FIREBASE_API_KEY,
-    authDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN,
-    projectId: process.env.VITE_FIREBASE_PROJECT_ID,
-    storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET || undefined,
-    messagingSenderId: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID || undefined,
-    appId: process.env.VITE_FIREBASE_APP_ID,
-  };
+  const __dirname = dirname(fileURLToPath(import.meta.url));
+  const serviceAccount = JSON.parse(
+    readFileSync(join(__dirname, '../serviceAccount.json'), 'utf8')
+  );
 
-  let app;
-  if (!getApps().length) {
-    app = initializeApp(firebaseConfig);
-  } else {
-    app = getApps()[0];
+  if (!admin.apps.length) {
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount)
+    });
   }
-
-  const db = getFirestore(app);
-
-  if (process.env.FIRESTORE_EMULATOR_HOST) {
-    const [host, portStr] = process.env.FIRESTORE_EMULATOR_HOST.split(':');
-    connectFirestoreEmulator(db, host, Number(portStr) || 8080);
-    console.log(`🔧 Usando emulador Firestore en ${process.env.FIRESTORE_EMULATOR_HOST}`);
-  }
+  const db = admin.firestore();
   return syncResults(db);
 }
 
