@@ -387,7 +387,14 @@ export default function FixturePage() {
 
   const dayMatches = useMemo(() => {
     if (!selectedDate) return [];
-    return visibleMatches.filter((m) => getLocalDateKey(m) === selectedDate);
+    return visibleMatches
+      .filter((m) => getLocalDateKey(m) === selectedDate)
+      .sort((a, b) => {
+        const da = getMatchDate(a), db = getMatchDate(b);
+        if (!da) return 1;
+        if (!db) return -1;
+        return da - db;
+      });
   }, [visibleMatches, selectedDate]);
 
   useEffect(() => {
