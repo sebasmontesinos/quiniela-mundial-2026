@@ -76,6 +76,7 @@ const TEAM_NAME_MAP = {
   Cameroon: 'Camerún',
   Canada: 'Canadá',
   'Cape Verde': 'Cabo Verde',
+  'Cape Verde Islands': 'Cabo Verde',
   Chile: 'Chile',
   'China PR': 'China',
   Colombia: 'Colombia',
