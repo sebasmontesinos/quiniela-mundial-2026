@@ -279,6 +279,7 @@ export default function FixturePage() {
   const [error, setError] = useState('');
   const [selectedDate, setSelectedDate] = useState(null);
   const navRef = useRef(null);
+  const dateButtonRefs = useRef({});
 
   const reloadPredictions = async () => {
     if (!currentUser) return;
@@ -398,10 +399,12 @@ export default function FixturePage() {
   }, [visibleMatches, selectedDate]);
 
   useEffect(() => {
-    if (navRef.current && dateKeys.length > 0) {
-      navRef.current.scrollLeft = 0;
+    if (!navRef.current || !selectedDate) return;
+    const btn = dateButtonRefs.current[selectedDate];
+    if (btn) {
+      btn.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
     }
-  }, [dateKeys]);
+  }, [selectedDate, dateKeys]);
 
   const handleGoToday = () => {
     setSelectedDate(todayKey);
@@ -491,6 +494,7 @@ export default function FixturePage() {
               {dateKeys.map((key) => (
                 <button
                   key={key}
+                  ref={(el) => { dateButtonRefs.current[key] = el; }}
                   type="button"
                   onClick={() => setSelectedDate(key)}
                   className={`flex-shrink-0 snap-start px-3 py-2 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap ${
