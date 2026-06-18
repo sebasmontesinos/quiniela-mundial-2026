@@ -30,9 +30,17 @@ export async function syncResults(db) {
   function findMatch(apiMatch, fsMatches) {
     const home = matchTeamName(apiMatch.homeTeam);
     const away = matchTeamName(apiMatch.awayTeam);
-    return fsMatches.find(
+    const direct = fsMatches.find(
       (m) => m.homeTeam === home && m.awayTeam === away
-    ) || null;
+    );
+    if (direct) return direct;
+    const reversed = fsMatches.find(
+      (m) => m.homeTeam === away && m.awayTeam === home
+    );
+    if (reversed) {
+      console.log(`  ⚠  Orden invertido en API: ${apiMatch.homeTeam} vs ${apiMatch.awayTeam} → encontrado como ${reversed.homeTeam} vs ${reversed.awayTeam}`);
+    }
+    return reversed || null;
   }
 
   let updated = 0;
