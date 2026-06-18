@@ -33,14 +33,15 @@ export async function syncResults(db) {
     const direct = fsMatches.find(
       (m) => m.homeTeam === home && m.awayTeam === away
     );
-    if (direct) return direct;
+    if (direct) return { match: direct, reversed: false };
     const reversed = fsMatches.find(
       (m) => m.homeTeam === away && m.awayTeam === home
     );
     if (reversed) {
       console.log(`  ⚠  Orden invertido en API: ${apiMatch.homeTeam} vs ${apiMatch.awayTeam} → encontrado como ${reversed.homeTeam} vs ${reversed.awayTeam}`);
+      return { match: reversed, reversed: true };
     }
-    return reversed || null;
+    return null;
   }
 
   let updated = 0;
@@ -59,12 +60,13 @@ export async function syncResults(db) {
   }
 
   for (const apiMatch of liveRecent) {
-    const fsMatch = findMatch(apiMatch, firestoreMatches);
-    if (!fsMatch) {
+    const found = findMatch(apiMatch, firestoreMatches);
+    if (!found) {
       emit(`  ↦ Sin equivalencia: ${apiMatch.homeTeam} vs ${apiMatch.awayTeam} (${apiMatch.status})`);
       continue;
     }
 
+    const fsMatch = found.match;
     const isLive = apiMatch.status === 'IN_PLAY' || apiMatch.status === 'PAUSED';
 
     if (isLive && !fsMatch.locked) {
@@ -78,8 +80,8 @@ export async function syncResults(db) {
     }
 
     if (apiMatch.status === 'FINISHED' && fsMatch.status !== 'finished') {
-      const homeScore = apiMatch.homeScore;
-      const awayScore = apiMatch.awayScore;
+      const homeScore = found.reversed ? apiMatch.awayScore : apiMatch.homeScore;
+      const awayScore = found.reversed ? apiMatch.homeScore : apiMatch.awayScore;
 
       if (homeScore == null || awayScore == null) {
         emit(`  ⚠  Sin marcador para: ${fsMatch.homeTeam} vs ${fsMatch.awayTeam}`);
@@ -138,14 +140,14 @@ export async function syncResults(db) {
 
     const matchDate = new Date(apiMatch.utcDate);
     if (matchDate > now && matchDate <= fiveMinFromNow) {
-      const fsMatch = findMatch(apiMatch, firestoreMatches);
-      if (!fsMatch) continue;
-      if (fsMatch.locked) continue;
+      const found = findMatch(apiMatch, firestoreMatches);
+      if (!found) continue;
+      if (found.match.locked) continue;
 
-      await db.collection('matches').doc(fsMatch.id).update({
+      await db.collection('matches').doc(found.match.id).update({
         locked: true,
       });
-      emit(`  🔒 Bloqueado (próximo 5 min): ${fsMatch.homeTeam} vs ${fsMatch.awayTeam}`);
+      emit(`  🔒 Bloqueado (próximo 5 min): ${found.match.homeTeam} vs ${found.match.awayTeam}`);
       updated++;
     }
   }
