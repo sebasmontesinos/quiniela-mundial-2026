@@ -156,13 +156,31 @@ export async function syncResults(db) {
     }
 
     if (apiMatch.status === 'FINISHED' && fsMatch.status !== 'finished') {
-      const homeScore = found.reversed ? apiMatch.awayScore : apiMatch.homeScore;
-      const awayScore = found.reversed ? apiMatch.homeScore : apiMatch.awayScore;
+      const isKnockout = fsMatch.stage && fsMatch.stage !== 'group';
+
+      // For knockout, score by the 90-minute result (regularTime). Fall back to fullTime if regularTime is missing.
+      let rawHome, rawAway;
+      if (isKnockout && apiMatch.regularTimeHome != null && apiMatch.regularTimeAway != null) {
+        rawHome = apiMatch.regularTimeHome;
+        rawAway = apiMatch.regularTimeAway;
+      } else {
+        rawHome = apiMatch.homeScore;
+        rawAway = apiMatch.awayScore;
+      }
+
+      const homeScore = found.reversed ? rawAway : rawHome;
+      const awayScore = found.reversed ? rawHome : rawAway;
 
       if (homeScore == null || awayScore == null) {
         emit(`  ⚠  Sin marcador para: ${fsMatch.homeTeam} vs ${fsMatch.awayTeam}`);
         continue;
       }
+
+      // Determine winner side from our perspective (accounting for reversed order).
+      // apiMatch.winner is 'HOME_TEAM' | 'AWAY_TEAM' | 'DRAW' from the API's perspective.
+      let winnerForUs = apiMatch.winner;
+      if (found.reversed && apiMatch.winner === 'HOME_TEAM') winnerForUs = 'AWAY_TEAM';
+      else if (found.reversed && apiMatch.winner === 'AWAY_TEAM') winnerForUs = 'HOME_TEAM';
 
       await db.collection('matches').doc(fsMatch.id).update({
         homeScore,
@@ -170,7 +188,7 @@ export async function syncResults(db) {
         status: 'finished',
         locked: true,
       });
-      emit(`  ✅ Resultado: ${fsMatch.homeTeam} ${homeScore} - ${awayScore} ${fsMatch.awayTeam}`);
+      emit(`  ✅ Resultado: ${fsMatch.homeTeam} ${homeScore} - ${awayScore} ${fsMatch.awayTeam}${isKnockout ? ' (90′)' : ''}`);
       updated++;
 
       /* score predictions for this match */
@@ -181,12 +199,13 @@ export async function syncResults(db) {
       }
 
       const matchForCalc = { homeScore, awayScore };
+      const knockoutInfo = isKnockout ? { isKnockout: true, winner: winnerForUs } : null;
       const batch = db.batch();
       let batchCount = 0;
 
       predSnap.docs.forEach((pd) => {
         const data = pd.data();
-        const points = calculatePoints(data, matchForCalc);
+        const points = calculatePoints(data, matchForCalc, knockoutInfo);
         batch.update(db.collection('predictions').doc(pd.id), { points });
         batchCount++;
         scored++;
