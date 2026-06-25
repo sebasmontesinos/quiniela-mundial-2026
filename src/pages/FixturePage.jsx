@@ -64,6 +64,12 @@ function MatchStatusBadge({ match, locked, isToday: isTodayMatch, isTomorrow }) 
 function PredictionForm({ match, prediction, userId, onSaved, simulationMode }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const isKnockout = match.stage && match.stage !== 'group';
+  const [homeVal, setHomeVal] = useState(prediction?.predictedHomeScore ?? 0);
+  const [awayVal, setAwayVal] = useState(prediction?.predictedAwayScore ?? 0);
+  const [advances, setAdvances] = useState(prediction?.predictedAdvances ?? 'home');
+  const isDraw = Number(homeVal) === Number(awayVal);
+  const showAdvanceSelector = isKnockout && isDraw;
 
   const predictionKey = prediction
     ? `${prediction.predictedHomeScore}-${prediction.predictedAwayScore}`
@@ -71,9 +77,9 @@ function PredictionForm({ match, prediction, userId, onSaved, simulationMode }) 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const home = Number(formData.get('homeScore'));
-    const away = Number(formData.get('awayScore'));
+    const home = Number(homeVal);
+    const away = Number(awayVal);
+    const advancesToSave = (isKnockout && home === away) ? advances : null;
 
     console.log(
       `[PredictionForm] save: uid=${userId} matchId=${match.id} home=${home} away=${away} simulationMode=${simulationMode}`
@@ -83,9 +89,9 @@ function PredictionForm({ match, prediction, userId, onSaved, simulationMode }) 
       setSaving(true);
       setError('');
       if (simulationMode) {
-        await saveSimPrediction(userId, match.id, home, away);
+        await saveSimPrediction(userId, match.id, home, away, advancesToSave);
       } else {
-        await savePrediction(userId, match.id, home, away);
+        await savePrediction(userId, match.id, home, away, advancesToSave);
       }
       await onSaved();
     } catch (err) {
@@ -115,7 +121,8 @@ function PredictionForm({ match, prediction, userId, onSaved, simulationMode }) 
             type="number"
             min="0"
             name="homeScore"
-            defaultValue={prediction?.predictedHomeScore?.toString() ?? '0'}
+            value={homeVal}
+            onChange={(e) => setHomeVal(e.target.value)}
             className="w-16 bg-white border border-[#CBD5E0] rounded-lg px-2 py-1.5 text-[#1A202C] text-center focus:border-fifa-gold focus:outline-none focus:ring-1 focus:ring-fifa-gold"
           />
         </label>
@@ -126,7 +133,8 @@ function PredictionForm({ match, prediction, userId, onSaved, simulationMode }) 
             type="number"
             min="0"
             name="awayScore"
-            defaultValue={prediction?.predictedAwayScore?.toString() ?? '0'}
+            value={awayVal}
+            onChange={(e) => setAwayVal(e.target.value)}
             className="w-16 bg-white border border-[#CBD5E0] rounded-lg px-2 py-1.5 text-[#1A202C] text-center focus:border-fifa-gold focus:outline-none focus:ring-1 focus:ring-fifa-gold"
           />
         </label>
@@ -138,6 +146,36 @@ function PredictionForm({ match, prediction, userId, onSaved, simulationMode }) 
           {saving ? 'Guardando...' : prediction ? 'Actualizar' : 'Enviar'}
         </button>
       </div>
+      {showAdvanceSelector && (
+        <div className="mt-4 bg-[#102A86] border border-[#FFB800]/40 rounded-[10px] p-3">
+          <p className="text-xs text-[#FFE08A] m-0 mb-1 flex items-center gap-1.5 font-medium">
+            ⚠ Empate en los 90′ — ¿quién avanza?
+          </p>
+          <p className="text-[11px] text-[#9FB0E0] m-0 mb-2.5 leading-relaxed">
+            Si se define en tiempo extra o penales, ¿quién pasa de ronda?
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => setAdvances('home')}
+              className={advances === 'home'
+                ? 'bg-[#FFB800] text-[#1A202C] border-none rounded-[8px] py-2.5 px-1.5 text-[13px] font-medium'
+                : 'bg-transparent text-white border border-[#3E5FD9] rounded-[8px] py-2.5 px-1.5 text-[13px] font-medium'}
+            >
+              ⬆ {match.homeTeam}
+            </button>
+            <button
+              type="button"
+              onClick={() => setAdvances('away')}
+              className={advances === 'away'
+                ? 'bg-[#FFB800] text-[#1A202C] border-none rounded-[8px] py-2.5 px-1.5 text-[13px] font-medium'
+                : 'bg-transparent text-white border border-[#3E5FD9] rounded-[8px] py-2.5 px-1.5 text-[13px] font-medium'}
+            >
+              ⬆ {match.awayTeam}
+            </button>
+          </div>
+        </div>
+      )}
       {error && <p className="text-fifa-red text-xs mt-2">{error}</p>}
     </form>
   );
