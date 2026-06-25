@@ -3,9 +3,77 @@ import { fileURLToPath } from 'url';
 import {
   fetchLiveAndRecentMatches,
   fetchUpcomingMatches,
+  fetchAllMatches,
   matchTeamName,
 } from '../src/services/footballApi.js';
 import { calculatePoints } from '../src/services/scoring.js';
+
+const KNOCKOUT_STAGE_MAP = {
+  LAST_32: 'r32',
+  LAST_16: 'r16',
+  QUARTER_FINALS: 'qf',
+  SEMI_FINALS: 'sf',
+  THIRD_PLACE: 'third',
+  FINAL: 'final',
+};
+
+const KNOCKOUT_PLACEHOLDERS = ['Ganador', 'Perdedor', '1º', '2º', '3º', 'Grupo', 'Winner', 'Runner', 'Best'];
+
+function hasPlaceholder(name) {
+  if (!name) return true;
+  return KNOCKOUT_PLACEHOLDERS.some((p) => name.includes(p));
+}
+
+export async function resolveKnockoutTeams(db, apiMatchesParam = null) {
+  const log = [];
+  const emit = (m) => { console.log(m); log.push(m); };
+
+  let apiMatches = apiMatchesParam;
+  if (!apiMatches) {
+    try {
+      apiMatches = await fetchAllMatches();
+    } catch (err) {
+      emit(`[resolver] Error al consultar API: ${err.message}`);
+      return { resolved: 0, log };
+    }
+  }
+
+  const matchSnap = await db.collection('matches').get();
+  const fsMatches = matchSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+
+  let resolved = 0;
+
+  for (const [apiStage, ourStage] of Object.entries(KNOCKOUT_STAGE_MAP)) {
+    const apiArr = apiMatches
+      .filter((m) => m.stage === apiStage && m.homeTeam && m.awayTeam)
+      .sort((a, b) => new Date(a.utcDate) - new Date(b.utcDate));
+
+    const ourArr = fsMatches
+      .filter((m) => m.stage === ourStage)
+      .sort((a, b) => (a.matchNumber || 0) - (b.matchNumber || 0));
+
+    for (let i = 0; i < Math.min(apiArr.length, ourArr.length); i++) {
+      const api = apiArr[i];
+      const slot = ourArr[i];
+
+      const stillPlaceholder = hasPlaceholder(slot.homeTeam) || hasPlaceholder(slot.awayTeam);
+      if (!stillPlaceholder) continue;
+
+      const home = matchTeamName(api.homeTeam);
+      const away = matchTeamName(api.awayTeam);
+
+      const update = { homeTeam: home, awayTeam: away };
+      if (api.utcDate) update.matchDate = api.utcDate;
+
+      await db.collection('matches').doc(slot.id).update(update);
+      emit(`  🔓 Resuelto ${slot.id} (${ourStage}): ${home} vs ${away} @ ${api.utcDate}`);
+      resolved++;
+    }
+  }
+
+  emit(`\n📊 Resolver: ${resolved} partidos de eliminatoria resueltos.`);
+  return { resolved, log };
+}
 
 /* ------------------------------------------------------------------ */
 /*  Core sync logic — accepts a Firestore db instance                  */
@@ -15,6 +83,14 @@ export async function syncResults(db) {
   function emit(msg) {
     console.log(msg);
     log.push(msg);
+  }
+
+  /* ---- 0. Resolve knockout teams from API (reveals knockout matches) ---- */
+  try {
+    const r = await resolveKnockoutTeams(db);
+    r.log.forEach((m) => log.push(m));
+  } catch (err) {
+    console.error(`[resolver] Error: ${err.message}`);
   }
 
   /* ---- fetch all Firestore matches ---- */

@@ -59,6 +59,13 @@ export async function fetchUpcomingMatches() {
   return (data.matches || []).map(normalizeMatch);
 }
 
+export async function fetchAllMatches() {
+  const endpoint = `/competitions/${COMPETITION_CODE}/matches`;
+  console.log(`[footballApi] GET ${API_BASE}${endpoint}`);
+  const data = await apiFetch(endpoint);
+  return (data.matches || []).map(normalizeMatch);
+}
+
 const TEAM_NAME_MAP = {
   Afghanistan: 'Afganistán',
   Albania: 'Albania',
