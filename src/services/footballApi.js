@@ -26,15 +26,22 @@ async function apiFetch(endpoint) {
   return res.json();
 }
 
-function normalizeMatch(apiMatch) {
+export function normalizeMatch(apiMatch) {
+  const score = apiMatch.score || {};
+  const regular = score.regularTime || {};
   return {
     id: apiMatch.id,
     homeTeam: apiMatch.homeTeam?.name || '',
     awayTeam: apiMatch.awayTeam?.name || '',
     status: apiMatch.status,
-    homeScore: apiMatch.score?.fullTime?.home ?? null,
-    awayScore: apiMatch.score?.fullTime?.away ?? null,
+    homeScore: score.fullTime?.home ?? null,
+    awayScore: score.fullTime?.away ?? null,
     utcDate: apiMatch.utcDate || null,
+    stage: apiMatch.stage || null,
+    regularTimeHome: regular.home ?? null,
+    regularTimeAway: regular.away ?? null,
+    winner: score.winner ?? null,
+    duration: score.duration ?? null,
   };
 }
 
