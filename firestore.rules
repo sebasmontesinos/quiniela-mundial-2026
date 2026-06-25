@@ -154,7 +154,7 @@ service cloud.firestore {
             .data.get('locked', true) == false
         && request.resource.data.diff(resource.data).affectedKeys()
             .hasOnly([
-              'predictedWinner', 'predictedHomeScore', 'predictedAwayScore', 'updatedAt'
+              'predictedWinner', 'predictedHomeScore', 'predictedAwayScore', 'predictedAdvances', 'updatedAt'
             ])
         && request.resource.data.get('points', null) == resource.data.get('points', null);
 
@@ -239,7 +239,7 @@ service cloud.firestore {
             .data.get('locked', true) == false
         && request.resource.data.diff(resource.data).affectedKeys()
             .hasOnly([
-              'predictedWinner', 'predictedHomeScore', 'predictedAwayScore', 'updatedAt'
+              'predictedWinner', 'predictedHomeScore', 'predictedAwayScore', 'predictedAdvances', 'updatedAt'
             ])
         && request.resource.data.get('points', null) == resource.data.get('points', null);
 
