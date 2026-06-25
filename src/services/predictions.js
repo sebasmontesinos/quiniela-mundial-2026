@@ -33,7 +33,7 @@ export async function fetchPredictionsByMatch(matchId) {
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 }
 
-export async function savePrediction(userId, matchId, homeScore, awayScore, predictedAdvances = null) {
+export async function savePrediction(userId, matchId, homeScore, awayScore) {
   if (!userId) throw new Error('savePrediction called without a userId');
   if (!matchId) throw new Error('savePrediction called without a matchId');
 
@@ -52,7 +52,6 @@ export async function savePrediction(userId, matchId, homeScore, awayScore, pred
         predictedHomeScore,
         predictedAwayScore,
         predictedWinner,
-        predictedAdvances: predictedAdvances ?? null,
         updatedAt: now,
       });
     } else {
@@ -62,7 +61,6 @@ export async function savePrediction(userId, matchId, homeScore, awayScore, pred
         predictedHomeScore,
         predictedAwayScore,
         predictedWinner,
-        predictedAdvances: predictedAdvances ?? null,
         updatedAt: now,
         points: null,
         createdAt: now,
