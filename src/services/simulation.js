@@ -122,7 +122,7 @@ export function simPredictionDocId(userId, matchId) {
   return `${userId}_${matchId}`;
 }
 
-export async function saveSimPrediction(userId, matchId, homeScore, awayScore) {
+export async function saveSimPrediction(userId, matchId, homeScore, awayScore, predictedAdvances = null) {
   if (!userId) throw new Error('saveSimPrediction called without a userId');
   if (!matchId) throw new Error('saveSimPrediction called without a matchId');
 
@@ -140,6 +140,7 @@ export async function saveSimPrediction(userId, matchId, homeScore, awayScore) {
       predictedHomeScore,
       predictedAwayScore,
       predictedWinner,
+      predictedAdvances: predictedAdvances ?? null,
       updatedAt: now,
     });
   } else {
@@ -149,6 +150,7 @@ export async function saveSimPrediction(userId, matchId, homeScore, awayScore) {
       predictedHomeScore,
       predictedAwayScore,
       predictedWinner,
+      predictedAdvances: predictedAdvances ?? null,
       updatedAt: now,
       points: null,
       createdAt: now,
