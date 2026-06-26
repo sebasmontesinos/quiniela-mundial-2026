@@ -157,7 +157,9 @@ export default function StandingsPage() {
           firstLoad = false;
           setSelectedMatchId((prev) => {
             if (prev) return prev;
-            const locked = list.filter((m) => m.locked || m.status === 'finished');
+            const PLACEHOLDER_WORDS = ['Ganador','Perdedor','1º','2º','3º','Grupo','Winner','Runner','Best'];
+            const hasRealTeams = (m) => m.homeTeam && m.awayTeam && !PLACEHOLDER_WORDS.some(p => m.homeTeam.includes(p) || m.awayTeam.includes(p));
+            const locked = list.filter((m) => (m.locked || m.status === 'finished') && hasRealTeams(m));
             if (locked.length === 0) return null;
             return [...locked].sort((a, b) => {
               const aDate = toDate(a.matchDate)?.getTime() ?? 0;
