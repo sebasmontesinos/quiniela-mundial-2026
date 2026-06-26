@@ -43,18 +43,31 @@ export async function resolveKnockoutTeams(db, apiMatchesParam = null) {
 
   let resolved = 0;
 
+  // Helper: normalize any date (string or Firestore Timestamp) to epoch ms.
+  const toMs = (v) => {
+    if (!v) return null;
+    if (typeof v === 'string') return new Date(v).getTime();
+    if (v.toDate) return v.toDate().getTime();
+    if (v instanceof Date) return v.getTime();
+    return null;
+  };
+
   for (const [apiStage, ourStage] of Object.entries(KNOCKOUT_STAGE_MAP)) {
-    const apiArr = apiMatches
-      .filter((m) => m.stage === apiStage && m.homeTeam && m.awayTeam)
-      .sort((a, b) => new Date(a.utcDate) - new Date(b.utcDate));
+    const apiArr = apiMatches.filter(
+      (m) => m.stage === apiStage && m.homeTeam && m.awayTeam && m.utcDate
+    );
 
-    const ourArr = fsMatches
-      .filter((m) => m.stage === ourStage)
-      .sort((a, b) => (a.matchNumber || 0) - (b.matchNumber || 0));
+    const ourArr = fsMatches.filter((m) => m.stage === ourStage);
 
-    for (let i = 0; i < Math.min(apiArr.length, ourArr.length); i++) {
-      const api = apiArr[i];
-      const slot = ourArr[i];
+    for (const api of apiArr) {
+      const apiMs = toMs(api.utcDate);
+
+      // Find OUR slot whose matchDate equals the API's utcDate exactly.
+      const slot = ourArr.find((s) => toMs(s.matchDate) === apiMs);
+      if (!slot) {
+        emit(`  ⚠  Sin slot con fecha exacta para API ${api.utcDate} (${matchTeamName(api.homeTeam)} vs ${matchTeamName(api.awayTeam)})`);
+        continue;
+      }
 
       const stillPlaceholder = hasPlaceholder(slot.homeTeam) || hasPlaceholder(slot.awayTeam);
       if (!stillPlaceholder) continue;
@@ -62,10 +75,7 @@ export async function resolveKnockoutTeams(db, apiMatchesParam = null) {
       const home = matchTeamName(api.homeTeam);
       const away = matchTeamName(api.awayTeam);
 
-      const update = { homeTeam: home, awayTeam: away };
-      if (api.utcDate) update.matchDate = api.utcDate;
-
-      await db.collection('matches').doc(slot.id).update(update);
+      await db.collection('matches').doc(slot.id).update({ homeTeam: home, awayTeam: away });
       emit(`  🔓 Resuelto ${slot.id} (${ourStage}): ${home} vs ${away} @ ${api.utcDate}`);
       resolved++;
     }
