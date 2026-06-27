@@ -47,7 +47,7 @@ export const BRACKET_RIGHT = {
   ],
   qf: [
     {id:'QF_3', top:132},
-    {id:'QF_4', top:484},
+    {id:'QF_4', top:453},
   ],
   sf: [{id:'SF_2', top:308}],
 };
