@@ -23,7 +23,7 @@ export const BRACKET_TREE = {
 // The two sides of the bracket (for the ESPN-style symmetric layout).
 // Left side feeds SF_1, right side feeds SF_2.
 export const BRACKET_LEFT = {
-  r32: ['R32_1','R32_3','R32_2','R32_5','R32_9','R32_10','R32_11','R32_12'],
+  r32: ['R32_2','R32_5','R32_1','R32_3','R32_9','R32_10','R32_11','R32_12'],
   r16: [
     {id:'R16_2', top:44},
     {id:'R16_1', top:220},
