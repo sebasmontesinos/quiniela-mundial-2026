@@ -37,12 +37,6 @@ export default function Home() {
           >
             Posiciones
           </Link>
-          <Link
-            to="/bracket"
-            className="bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold px-6 py-3 rounded-xl border border-white/10 transition-colors"
-          >
-            🏆 Eliminatorias
-          </Link>
           {isAdmin && (
             <Link
               to="/admin"
