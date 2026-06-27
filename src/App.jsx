@@ -12,6 +12,7 @@ import PendingScreen from './pages/PendingScreen';
 import BlockedScreen from './pages/BlockedScreen';
 import AdminPanel from './pages/AdminPanel';
 import ProfilePage from './pages/ProfilePage';
+import BracketPage from './pages/BracketPage';
 
 function ProtectedRoute({ children }) {
   const { currentUser } = useAuth();
@@ -100,6 +101,14 @@ function AuthenticatedRoutes() {
           element={
             <ActivePlayerRoute>
               <ProfilePage />
+            </ActivePlayerRoute>
+          }
+        />
+        <Route
+          path="/bracket"
+          element={
+            <ActivePlayerRoute>
+              <BracketPage />
             </ActivePlayerRoute>
           }
         />
