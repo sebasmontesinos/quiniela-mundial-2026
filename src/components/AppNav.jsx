@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const linkClass = ({ isActive }) =>
-  `px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
+  `px-2 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors whitespace-nowrap ${
     isActive
       ? 'bg-fifa-gold/20 text-fifa-gold border border-fifa-gold/40'
       : 'text-[#B8C5F0] hover:text-white hover:bg-white/10'
@@ -22,8 +22,8 @@ export default function AppNav() {
 
   return (
     <nav className="bg-[#0F2A8A] border-b-2 border-fifa-gold/80 sticky top-0 z-50">
-      <div className="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2 flex-wrap">
+      <div className="max-w-6xl mx-auto px-3 py-2 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1 overflow-x-auto" style={{scrollbarWidth:'none'}}>
           <span className="font-bold text-sm mr-3 text-lg hidden sm:inline tracking-wide flex items-center gap-1">
             <span className="text-fifa-gold">Mundial 2026</span>
             <span className="text-fifa-red text-2xl leading-none">•</span>
