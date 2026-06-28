@@ -18,16 +18,20 @@ const toBoliviaTime = (matchDate) => {
   } catch { return ''; }
 };
 
+// Layout constants
 const SLOT = 88;
 const CARD_H = 62;
 const CARD_W = 148;
-const COL_W = 156;
-const TOTAL_H = 8 * SLOT;
+const COL_W = 158;
+const TOTAL_H = 8 * SLOT; // 704px
 
+// Verified against ESPN image + FIFA bracket tree
+// Left: Alemania, Francia, Sudáfrica, PaísesBajos, Portugal, España, USA, Bélgica
+// Right: Brasil, CostaMarfil, México, Inglaterra, Suiza, Argentina, Australia, Colombia
 const COORDS = {
   left: {
-    r32: ['R32_1','R32_3','R32_2','R32_5','R32_9','R32_10','R32_11','R32_12'],
-    r16: [{id:'R16_2',top:57},{id:'R16_1',top:233},{id:'R16_6',top:409},{id:'R16_5',top:585}],
+    r32: ['R32_2','R32_5','R32_1','R32_3','R32_11','R32_12','R32_9','R32_10'],
+    r16: [{id:'R16_1',top:57},{id:'R16_2',top:233},{id:'R16_5',top:409},{id:'R16_6',top:585}],
     qf:  [{id:'QF_1',top:145},{id:'QF_2',top:497}],
     sf:  [{id:'SF_1',top:321}],
   },
@@ -43,11 +47,11 @@ function TeamRow({ name, score, isHome }) {
   const Flag = teamFlagComponents?.[name];
   const ph = isPlaceholder(name);
   return (
-    <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'3px 0', borderTop: isHome ? 'none' : '0.5px solid rgba(62,95,217,0.4)' }}>
+    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'3px 0',borderTop:isHome?'none':'0.5px solid rgba(62,95,217,0.4)'}}>
       <div style={{display:'flex',alignItems:'center',gap:4,overflow:'hidden',flex:1}}>
         {!ph && Flag
-          ? <Flag style={{width:14,height:10,flexShrink:0,borderRadius:1}}/>
-          : <span style={{width:14,height:10,background:'rgba(62,95,217,0.3)',borderRadius:1,display:'inline-block',flexShrink:0}}/>
+          ? <Flag style={{width:16,height:11,flexShrink:0,borderRadius:1}}/>
+          : <span style={{width:16,height:11,background:'rgba(62,95,217,0.3)',borderRadius:1,display:'inline-block',flexShrink:0}}/>
         }
         <span style={{fontSize:10,color:ph?'#5a6fa8':'#fff',fontStyle:ph?'italic':'normal',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>
           {ph ? 'Por definir' : name}
@@ -139,15 +143,15 @@ export default function BracketPage() {
     </div>
   );
 
-  const TOTAL_W = 8 * COL_W + 180;
+  const TOTAL_W = 9 * COL_W + 180;
 
   return (
-    <div style={{padding:'12px',maxWidth:1600,margin:'0 auto'}}>
+    <div style={{padding:'12px',maxWidth:1800,margin:'0 auto'}}>
       <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:12}}>
         <button onClick={()=>navigate(-1)} style={{background:'rgba(255,184,0,0.15)',border:'1px solid rgba(255,184,0,0.4)',borderRadius:8,padding:'6px 12px',color:'#FFB800',fontSize:12,cursor:'pointer',flexShrink:0}}>← Volver</button>
         <div>
           <h1 style={{fontSize:18,fontWeight:500,color:'#FFB800',margin:0}}>🏆 Eliminatorias</h1>
-          <p style={{fontSize:10,color:'#7C90D9',margin:0}}>Los equipos se colocan solos a medida que se definen</p>
+          <p style={{fontSize:10,color:'#7C90D9',margin:0}}>Los ganadores avanzan solos a la siguiente ronda</p>
         </div>
       </div>
       <div style={{overflowX:'auto',WebkitOverflowScrolling:'touch'}}>
@@ -156,9 +160,9 @@ export default function BracketPage() {
           <Col slots={COORDS.left.r16}  matches={matches} predictions={predictions}/>
           <Col slots={COORDS.left.qf}   matches={matches} predictions={predictions}/>
           <Col slots={COORDS.left.sf}   matches={matches} predictions={predictions}/>
-          <div style={{width:180,flexShrink:0,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',height:TOTAL_H,gap:20}}>
+          <div style={{width:180,flexShrink:0,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',height:TOTAL_H,gap:16}}>
             <div style={{textAlign:'center'}}>
-              <div style={{fontSize:20,marginBottom:4}}>🏆</div>
+              <div style={{fontSize:22,marginBottom:4}}>🏆</div>
               <div style={{fontSize:11,fontWeight:500,color:'#FFB800',letterSpacing:1,marginBottom:8}}>FINAL</div>
               <Card match={matches['FINAL']} prediction={predictions['FINAL']}/>
             </div>
@@ -184,4 +188,3 @@ export default function BracketPage() {
     </div>
   );
 }
-// cache bust Sat Jun 27 02:23:41 -04 2026
