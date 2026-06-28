@@ -155,7 +155,7 @@ export default function BracketPage() {
         </div>
       </div>
       <div style={{overflowX:'auto',WebkitOverflowScrolling:'touch'}}>
-        <div style={{display:'flex',alignItems:'flex-start',width:TOTAL_W,background:'#0A1F66',border:'1px solid rgba(255,184,0,0.2)',borderRadius:12,padding:'12px 0',boxSizing:'border-box'}}>
+        <div style={{display:'flex',alignItems:'flex-start',width:'fit-content',background:'#0A1F66',border:'1px solid rgba(255,184,0,0.2)',borderRadius:12,padding:'12px 0',boxSizing:'border-box'}}>
           <Col slots={COORDS.left.r32}  matches={matches} predictions={predictions} isR32/>
           <Col slots={COORDS.left.r16}  matches={matches} predictions={predictions}/>
           <Col slots={COORDS.left.qf}   matches={matches} predictions={predictions}/>
