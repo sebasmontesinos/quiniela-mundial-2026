@@ -34,6 +34,9 @@ export default function AppNav() {
           <NavLink to="/standings" className={linkClass}>
             Posiciones
           </NavLink>
+          <NavLink to="/bracket" className={linkClass}>
+            Eliminatorias
+          </NavLink>
           {isAdmin && (
             <NavLink to="/admin" className={linkClass}>
               Admin
