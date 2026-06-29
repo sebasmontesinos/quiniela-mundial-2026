@@ -199,6 +199,7 @@ export async function syncResults(db) {
         awayScore,
         status: 'finished',
         locked: true,
+        ...(winnerForUs ? { winner: winnerForUs } : {}),
       });
       emit(`  ✅ Resultado: ${fsMatch.homeTeam} ${homeScore} - ${awayScore} ${fsMatch.awayTeam}${isKnockout ? ' (90′)' : ''}`);
       updated++;
