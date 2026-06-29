@@ -83,6 +83,49 @@ export async function resolveKnockoutTeams(db, apiMatchesParam = null) {
     }
   }
 
+  // Fallback: resolve R16 slots from finished R32 matches in Firestore
+  // when the API hasn't populated the R16 teams yet.
+  const BRACKET_TREE = {
+    R16_1: ['R32_2','R32_5'],
+    R16_2: ['R32_1','R32_3'],
+    R16_3: ['R32_4','R32_6'],
+    R16_4: ['R32_7','R32_8'],
+    R16_5: ['R32_11','R32_12'],
+    R16_6: ['R32_9','R32_10'],
+    R16_7: ['R32_14','R32_16'],
+    R16_8: ['R32_13','R32_15'],
+  };
+
+  for (const [r16Id, [feedA, feedB]] of Object.entries(BRACKET_TREE)) {
+    const r16Slot = fsMatches.find(m => m.id === r16Id);
+    if (!r16Slot) continue;
+
+    const slotA = fsMatches.find(m => m.id === feedA);
+    const slotB = fsMatches.find(m => m.id === feedB);
+
+    const winnerOf = (slot) => {
+      if (!slot || slot.status !== 'finished' || !slot.winner) return null;
+      if (slot.winner === 'HOME_TEAM') return slot.homeTeam;
+      if (slot.winner === 'AWAY_TEAM') return slot.awayTeam;
+      return null;
+    };
+
+    const winnerA = winnerOf(slotA);
+    const winnerB = winnerOf(slotB);
+
+    const homeChanged = winnerA && hasPlaceholder(r16Slot.homeTeam) && winnerA !== r16Slot.homeTeam;
+    const awayChanged = winnerB && hasPlaceholder(r16Slot.awayTeam) && winnerB !== r16Slot.awayTeam;
+
+    if (!homeChanged && !awayChanged) continue;
+
+    const update = {};
+    if (homeChanged) update.homeTeam = winnerA;
+    if (awayChanged) update.awayTeam = winnerB;
+    await db.collection('matches').doc(r16Id).update(update);
+    emit(`  🔓 Resuelto ${r16Id} desde Firestore: ${winnerA || '?'} vs ${winnerB || '?'}`);
+    resolved++;
+  }
+
   emit(`\n📊 Resolver: ${resolved} partidos de eliminatoria resueltos.`);
   return { resolved, log };
 }
