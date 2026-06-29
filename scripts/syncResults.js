@@ -54,7 +54,7 @@ export async function resolveKnockoutTeams(db, apiMatchesParam = null) {
 
   for (const [apiStage, ourStage] of Object.entries(KNOCKOUT_STAGE_MAP)) {
     const apiArr = apiMatches.filter(
-      (m) => m.stage === apiStage && (m.homeTeam || m.awayTeam) && m.utcDate
+      (m) => m.stage === apiStage && m.homeTeam && m.awayTeam && m.utcDate
     );
 
     const ourArr = fsMatches.filter((m) => m.stage === ourStage);
@@ -69,15 +69,13 @@ export async function resolveKnockoutTeams(db, apiMatchesParam = null) {
         continue;
       }
 
+      const stillPlaceholder = hasPlaceholder(slot.homeTeam) || hasPlaceholder(slot.awayTeam);
+      if (!stillPlaceholder) continue;
+
       const home = matchTeamName(api.homeTeam);
       const away = matchTeamName(api.awayTeam);
-      const homeChanged = home && hasPlaceholder(slot.homeTeam) && home !== slot.homeTeam;
-      const awayChanged = away && hasPlaceholder(slot.awayTeam) && away !== slot.awayTeam;
-      if (!homeChanged && !awayChanged) continue;
-      const update = {};
-      if (homeChanged) update.homeTeam = home;
-      if (awayChanged) update.awayTeam = away;
-      await db.collection('matches').doc(slot.id).update(update);
+
+      await db.collection('matches').doc(slot.id).update({ homeTeam: home, awayTeam: away });
       emit(`  🔓 Resuelto ${slot.id} (${ourStage}): ${home} vs ${away} @ ${api.utcDate}`);
       resolved++;
     }
