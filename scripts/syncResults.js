@@ -251,10 +251,11 @@ export async function syncResults(db) {
       }
 
       let penaltiesForUs = null;
-      if (apiMatch.duration === 'PENALTY_SHOOTOUT' && apiMatch.penalties) {
+      if (apiMatch.duration === 'PENALTY_SHOOTOUT' && apiMatch.fullTimeRaw) {
+        const ft = apiMatch.fullTimeRaw;
         penaltiesForUs = found.reversed
-          ? { home: apiMatch.penalties.away, away: apiMatch.penalties.home }
-          : { home: apiMatch.penalties.home, away: apiMatch.penalties.away };
+          ? { home: ft.away, away: ft.home }
+          : { home: ft.home, away: ft.away };
       }
 
       await db.collection('matches').doc(fsMatch.id).update({
