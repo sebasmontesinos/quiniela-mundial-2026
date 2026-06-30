@@ -242,6 +242,14 @@ export async function syncResults(db) {
       if (found.reversed && winnerForUs === 'HOME_TEAM') winnerForUs = 'AWAY_TEAM';
       else if (found.reversed && winnerForUs === 'AWAY_TEAM') winnerForUs = 'HOME_TEAM';
 
+      // Safety: if this is a penalty shootout but we still couldn't determine
+      // a winner (API reporting incomplete/tied penalty data), skip this match
+      // entirely rather than marking it finished with a false result.
+      if (apiMatch.duration === 'PENALTY_SHOOTOUT' && !winnerForUs) {
+        emit(`  ⏳ Penales en curso, esperando resultado final: ${fsMatch.homeTeam} vs ${fsMatch.awayTeam}`);
+        continue;
+      }
+
       let penaltiesForUs = null;
       if (apiMatch.duration === 'PENALTY_SHOOTOUT' && apiMatch.penalties) {
         penaltiesForUs = found.reversed
