@@ -283,10 +283,19 @@ export default function StandingsPage() {
 
       const result = getResultLabel(points, matchFinished);
 
+      let advancesText = null;
+      if (pred.predictedAdvances) {
+        const advancedTeam = pred.predictedAdvances === 'home'
+          ? matchDetail.homeTeam
+          : matchDetail.awayTeam;
+        advancesText = `Avanza: ${advancedTeam}`;
+      }
+
       rows.push({
         user,
         prediction: pred,
         predictionText: `${matchDetail.homeTeam} ${pred.predictedHomeScore} - ${pred.predictedAwayScore} ${matchDetail.awayTeam}`,
+        advancesText,
         predictedAt: pred.createdAt || pred.updatedAt,
         result,
         points: points != null ? points : '-',
@@ -673,9 +682,16 @@ export default function StandingsPage() {
                           </td>
                           <td className="px-4 py-3">
                             {row.didPredict ? (
-                              <span className="text-white font-medium text-xs">
-                                {row.predictionText}
-                              </span>
+                              <div>
+                                <span className="text-white font-medium text-xs block">
+                                  {row.predictionText}
+                                </span>
+                                {row.advancesText && (
+                                  <span className="text-fifa-gold text-xs block mt-0.5">
+                                    {row.advancesText}
+                                  </span>
+                                )}
+                              </div>
                             ) : (
                               <span className="inline-block px-2 py-1 bg-[#2D3748]/50 text-[#94A3B8] text-xs rounded-full font-medium">
                                 No predijo
