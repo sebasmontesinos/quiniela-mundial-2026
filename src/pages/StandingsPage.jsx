@@ -161,9 +161,14 @@ export default function StandingsPage() {
             if (prev) return prev;
             const PLACEHOLDER_WORDS = ['Ganador','Perdedor','1º','2º','3º','Grupo','Winner','Runner','Best'];
             const hasRealTeams = (m) => m.homeTeam && m.awayTeam && !PLACEHOLDER_WORDS.some(p => m.homeTeam.includes(p) || m.awayTeam.includes(p));
-            const locked = list.filter((m) => (m.locked || m.status === 'finished') && hasRealTeams(m));
-            if (locked.length === 0) return null;
-            return [...locked].sort((a, b) => {
+            // Prefer the most recent FINISHED match (real result to audit).
+            // Only fall back to a locked-but-not-finished match if nothing has finished yet.
+            const finished = list.filter((m) => m.status === 'finished' && hasRealTeams(m));
+            const pool = finished.length > 0
+              ? finished
+              : list.filter((m) => m.locked && hasRealTeams(m));
+            if (pool.length === 0) return null;
+            return [...pool].sort((a, b) => {
               const aDate = toDate(a.matchDate)?.getTime() ?? 0;
               const bDate = toDate(b.matchDate)?.getTime() ?? 0;
               return bDate - aDate;
