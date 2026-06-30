@@ -687,7 +687,7 @@ export default function StandingsPage() {
                                   {row.predictionText}
                                 </span>
                                 {row.advancesText && (
-                                  <span className="text-fifa-gold text-xs block mt-0.5">
+                                  <span className="text-xs block mt-0.5" style={{color:'#FFB800'}}>
                                     {row.advancesText}
                                   </span>
                                 )}
