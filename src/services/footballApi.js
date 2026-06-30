@@ -36,6 +36,7 @@ export function normalizeMatch(apiMatch) {
     status: apiMatch.status,
     homeScore: score.fullTime?.home ?? null,
     awayScore: score.fullTime?.away ?? null,
+    fullTimeRaw: score.fullTime ?? null,
     utcDate: apiMatch.utcDate || null,
     stage: apiMatch.stage || null,
     regularTimeHome: regular.home ?? null,

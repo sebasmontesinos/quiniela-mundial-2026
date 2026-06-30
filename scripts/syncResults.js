@@ -234,6 +234,11 @@ export async function syncResults(db) {
       // Determine winner side from our perspective (accounting for reversed order).
       // apiMatch.winner is 'HOME_TEAM' | 'AWAY_TEAM' | 'DRAW' from the API's perspective.
       let winnerForUs = apiMatch.winner;
+      if (!winnerForUs && apiMatch.duration === 'PENALTY_SHOOTOUT') {
+        const ft = apiMatch.fullTimeRaw || {};
+        if (ft.home > ft.away) winnerForUs = 'HOME_TEAM';
+        else if (ft.away > ft.home) winnerForUs = 'AWAY_TEAM';
+      }
       if (found.reversed && apiMatch.winner === 'HOME_TEAM') winnerForUs = 'AWAY_TEAM';
       else if (found.reversed && apiMatch.winner === 'AWAY_TEAM') winnerForUs = 'HOME_TEAM';
 
