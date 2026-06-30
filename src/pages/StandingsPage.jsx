@@ -65,7 +65,9 @@ function formatPredictionDate(value) {
 
 function getResultLabel(points, matchFinished) {
   if (!matchFinished) return { icon: '⏳', text: 'Pendiente' };
+  if (points === 4) return { icon: '✅', text: 'Exacto' };
   if (points === 3) return { icon: '✅', text: 'Exacto' };
+  if (points === 2) return { icon: '🎯', text: 'Ganador' };
   if (points === 1) return { icon: '🎯', text: 'Ganador' };
   if (points === 0) return { icon: '❌', text: 'Mal' };
   return { icon: '⏳', text: 'Pendiente' };
@@ -284,11 +286,18 @@ export default function StandingsPage() {
       const result = getResultLabel(points, matchFinished);
 
       let advancesText = null;
+      let bonusHit = null;
       if (pred.predictedAdvances) {
         const advancedTeam = pred.predictedAdvances === 'home'
           ? matchDetail.homeTeam
           : matchDetail.awayTeam;
         advancesText = `Avanza: ${advancedTeam}`;
+        if (matchFinished && matchDetail.winner) {
+          const actualSide = matchDetail.winner === 'HOME_TEAM' ? 'home' : matchDetail.winner === 'AWAY_TEAM' ? 'away' : null;
+          if (actualSide) {
+            bonusHit = pred.predictedAdvances === actualSide;
+          }
+        }
       }
 
       rows.push({
@@ -296,6 +305,7 @@ export default function StandingsPage() {
         prediction: pred,
         predictionText: `${matchDetail.homeTeam} ${pred.predictedHomeScore} - ${pred.predictedAwayScore} ${matchDetail.awayTeam}`,
         advancesText,
+        bonusHit,
         predictedAt: pred.createdAt || pred.updatedAt,
         result,
         points: points != null ? points : '-',
@@ -705,25 +715,42 @@ export default function StandingsPage() {
                           </td>
                           <td className="px-4 py-3">
                             {row.didPredict ? (
-                              <span
-                                className={`text-xs font-semibold ${
-                                  row.result?.icon === '✅'
-                                    ? 'text-[#10B981]'
-                                    : row.result?.icon === '🎯'
-                                    ? 'text-fifa-gold'
-                                    : row.result?.icon === '❌'
-                                    ? 'text-fifa-red'
-                                    : 'text-[#94A3B8]'
-                                }`}
-                              >
-                                {row.result?.icon} {row.result?.text}
-                              </span>
+                              <div>
+                                <span
+                                  className={`text-xs font-semibold block ${
+                                    row.result?.icon === '✅'
+                                      ? 'text-[#10B981]'
+                                      : row.result?.icon === '🎯'
+                                      ? 'text-fifa-gold'
+                                      : row.result?.icon === '❌'
+                                      ? 'text-fifa-red'
+                                      : 'text-[#94A3B8]'
+                                  }`}
+                                >
+                                  {row.result?.icon} {row.result?.text}
+                                </span>
+                                {row.bonusHit === true && (
+                                  <span className="text-xs block mt-0.5" style={{color:'#FFB800'}}>
+                                    ✓ Bonus acertado
+                                  </span>
+                                )}
+                                {row.bonusHit === false && (
+                                  <span className="text-xs text-[#94A3B8] block mt-0.5">
+                                    ✗ Bonus fallado
+                                  </span>
+                                )}
+                              </div>
                             ) : (
                               <span className="text-xs text-[#94A3B8]">—</span>
                             )}
                           </td>
                           <td className="px-4 py-3 text-right text-sm font-bold text-white">
                             {row.points}
+                            {row.bonusHit === true && typeof row.points === 'number' && (
+                              <span className="text-xs block" style={{color:'#FFB800'}}>
+                                ({row.points - 1}+1)
+                              </span>
+                            )}
                           </td>
                         </tr>
                       );
