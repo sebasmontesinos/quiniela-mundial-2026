@@ -242,12 +242,21 @@ export async function syncResults(db) {
       if (found.reversed && winnerForUs === 'HOME_TEAM') winnerForUs = 'AWAY_TEAM';
       else if (found.reversed && winnerForUs === 'AWAY_TEAM') winnerForUs = 'HOME_TEAM';
 
+      let penaltiesForUs = null;
+      if (apiMatch.duration === 'PENALTY_SHOOTOUT' && apiMatch.penalties) {
+        penaltiesForUs = found.reversed
+          ? { home: apiMatch.penalties.away, away: apiMatch.penalties.home }
+          : { home: apiMatch.penalties.home, away: apiMatch.penalties.away };
+      }
+
       await db.collection('matches').doc(fsMatch.id).update({
         homeScore,
         awayScore,
         status: 'finished',
         locked: true,
         ...(winnerForUs ? { winner: winnerForUs } : {}),
+        ...(apiMatch.duration ? { duration: apiMatch.duration } : {}),
+        ...(penaltiesForUs ? { penalties: penaltiesForUs } : {}),
       });
       emit(`  ✅ Resultado: ${fsMatch.homeTeam} ${homeScore} - ${awayScore} ${fsMatch.awayTeam}${isKnockout ? ' (90′)' : ''}`);
       updated++;

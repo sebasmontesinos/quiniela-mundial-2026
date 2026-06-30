@@ -85,6 +85,16 @@ function Card({ match, prediction }) {
           {gotPts?'✓ ':''}Pred: {prediction.predictedHomeScore}-{prediction.predictedAwayScore}
         </div>
       )}
+      {finished && match.duration === 'PENALTY_SHOOTOUT' && match.penalties && (
+        <div style={{fontSize:8,color:'#FFB800',marginTop:2,paddingTop:2,borderTop:'0.5px solid rgba(62,95,217,0.3)'}}>
+          Pen: {match.penalties.home}-{match.penalties.away} · avanza {match.winner === 'HOME_TEAM' ? match.homeTeam : match.awayTeam}
+        </div>
+      )}
+      {finished && match.duration === 'EXTRA_TIME' && (
+        <div style={{fontSize:8,color:'#2DD4A7',marginTop:2,paddingTop:2,borderTop:'0.5px solid rgba(62,95,217,0.3)'}}>
+          Tiempo extra
+        </div>
+      )}
     </div>
   );
 }

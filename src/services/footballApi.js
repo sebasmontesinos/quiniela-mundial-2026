@@ -43,6 +43,7 @@ export function normalizeMatch(apiMatch) {
     regularTimeAway: regular.away ?? null,
     winner: score.winner ?? null,
     duration: score.duration ?? null,
+    penalties: score.penalties ?? null,
   };
 }
 

@@ -232,6 +232,18 @@ function MatchCard({ match, prediction, userId, onPredictionSaved, simulationMod
         </p>
       )}
 
+      {showResult && match.stage && match.stage !== 'group' && match.duration === 'EXTRA_TIME' && (
+        <p className="text-xs text-[#2DD4A7] mt-1">
+          {match.winner === 'HOME_TEAM' ? match.homeTeam : match.awayTeam} avanzó en tiempo extra
+        </p>
+      )}
+
+      {showResult && match.stage && match.stage !== 'group' && match.duration === 'PENALTY_SHOOTOUT' && match.penalties && (
+        <p className="text-xs text-[#FFB800] mt-1">
+          {match.winner === 'HOME_TEAM' ? match.homeTeam : match.awayTeam} avanzó por penales ({match.penalties.home}-{match.penalties.away})
+        </p>
+      )}
+
       {canPredict && (
         <PredictionForm
           match={match}
