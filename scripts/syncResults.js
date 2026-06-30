@@ -239,8 +239,8 @@ export async function syncResults(db) {
         if (ft.home > ft.away) winnerForUs = 'HOME_TEAM';
         else if (ft.away > ft.home) winnerForUs = 'AWAY_TEAM';
       }
-      if (found.reversed && apiMatch.winner === 'HOME_TEAM') winnerForUs = 'AWAY_TEAM';
-      else if (found.reversed && apiMatch.winner === 'AWAY_TEAM') winnerForUs = 'HOME_TEAM';
+      if (found.reversed && winnerForUs === 'HOME_TEAM') winnerForUs = 'AWAY_TEAM';
+      else if (found.reversed && winnerForUs === 'AWAY_TEAM') winnerForUs = 'HOME_TEAM';
 
       await db.collection('matches').doc(fsMatch.id).update({
         homeScore,
