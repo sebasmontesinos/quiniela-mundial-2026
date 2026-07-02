@@ -92,7 +92,7 @@ function Card({ match, prediction }) {
       )}
       {finished && match.duration === 'EXTRA_TIME' && (
         <div style={{fontSize:8,color:'#2DD4A7',marginTop:2,paddingTop:2,borderTop:'0.5px solid rgba(62,95,217,0.3)'}}>
-          Tiempo extra
+          {match.winner === 'HOME_TEAM' ? match.homeTeam : match.awayTeam} avanzó en tiempo extra
         </div>
       )}
     </div>
