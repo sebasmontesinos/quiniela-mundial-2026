@@ -213,11 +213,16 @@ export async function syncResults(db) {
     if (apiMatch.status === 'FINISHED' && fsMatch.status !== 'finished') {
       const isKnockout = fsMatch.stage && fsMatch.stage !== 'group';
 
-      // For knockout, score by the 90-minute result (regularTime). Fall back to fullTime if regularTime is missing.
+      // For knockout, score by the 90-minute result (regularTime).
+      // If regularTime is null but extraTime exists, derive it as fullTime - extraTime.
+      // Fall back to fullTime only if we have no other option.
       let rawHome, rawAway;
       if (isKnockout && apiMatch.regularTimeHome != null && apiMatch.regularTimeAway != null) {
         rawHome = apiMatch.regularTimeHome;
         rawAway = apiMatch.regularTimeAway;
+      } else if (isKnockout && apiMatch.fullTimeRaw != null && apiMatch.extraTimeHome != null && apiMatch.extraTimeAway != null) {
+        rawHome = apiMatch.fullTimeRaw.home - apiMatch.extraTimeHome;
+        rawAway = apiMatch.fullTimeRaw.away - apiMatch.extraTimeAway;
       } else {
         rawHome = apiMatch.homeScore;
         rawAway = apiMatch.awayScore;

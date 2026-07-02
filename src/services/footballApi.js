@@ -41,6 +41,8 @@ export function normalizeMatch(apiMatch) {
     stage: apiMatch.stage || null,
     regularTimeHome: regular.home ?? null,
     regularTimeAway: regular.away ?? null,
+    extraTimeHome: score.extraTime?.home ?? null,
+    extraTimeAway: score.extraTime?.away ?? null,
     winner: score.winner ?? null,
     duration: score.duration ?? null,
     penalties: score.penalties ?? null,
