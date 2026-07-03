@@ -210,7 +210,9 @@ export async function syncResults(db) {
       continue;
     }
 
-    if (apiMatch.status === 'FINISHED' && fsMatch.status !== 'finished') {
+    const needsResync = apiMatch.status === 'FINISHED' && fsMatch.status === 'finished'
+      && fsMatch.winner === 'DRAW' && apiMatch.winner && apiMatch.winner !== 'DRAW';
+    if (apiMatch.status === 'FINISHED' && (fsMatch.status !== 'finished' || needsResync)) {
       const isKnockout = fsMatch.stage && fsMatch.stage !== 'group';
 
       // For knockout, score by the 90-minute result (regularTime).
