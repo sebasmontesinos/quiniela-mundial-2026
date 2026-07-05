@@ -92,8 +92,8 @@ export async function resolveKnockoutTeams(db, apiMatchesParam = null) {
     R16_4: ['R32_7','R32_8'],
     R16_5: ['R32_11','R32_12'],
     R16_6: ['R32_9','R32_10'],
-    R16_7: ['R32_14','R32_16'],
-    R16_8: ['R32_13','R32_15'],
+    R16_7: ['R32_15','R32_14'],
+    R16_8: ['R32_13','R32_16'],
   };
 
   for (const [r16Id, [feedA, feedB]] of Object.entries(BRACKET_TREE)) {
