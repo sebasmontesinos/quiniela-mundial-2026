@@ -100,8 +100,8 @@ export async function resolveKnockoutTeams(db, apiMatchesParam = null, fsMatches
     QF_2: ['R16_3','R16_4'],
     QF_3: ['R16_5','R16_6'],
     QF_4: ['R16_7','R16_8'],
-    SF_1: ['QF_1','QF_2'],
-    SF_2: ['QF_3','QF_4'],
+    SF_1: ['QF_1','QF_3'],
+    SF_2: ['QF_2','QF_4'],
     FINAL: ['SF_1','SF_2'],
   };
 
