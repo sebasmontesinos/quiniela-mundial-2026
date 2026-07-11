@@ -24,7 +24,7 @@ function hasPlaceholder(name) {
   return KNOCKOUT_PLACEHOLDERS.some((p) => name.includes(p));
 }
 
-export async function resolveKnockoutTeams(db, apiMatchesParam = null) {
+export async function resolveKnockoutTeams(db, apiMatchesParam = null, fsMatches = null) {
   const log = [];
   const emit = (m) => { console.log(m); log.push(m); };
 
@@ -38,8 +38,10 @@ export async function resolveKnockoutTeams(db, apiMatchesParam = null) {
     }
   }
 
-  const matchSnap = await db.collection('matches').get();
-  const fsMatches = matchSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  if (!fsMatches) {
+    const matchSnap = await db.collection('matches').get();
+    fsMatches = matchSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  }
 
   let resolved = 0;
 
@@ -147,17 +149,17 @@ export async function syncResults(db) {
     log.push(msg);
   }
 
+  /* ---- fetch all Firestore matches ---- */
+  const matchSnap = await db.collection('matches').get();
+  const firestoreMatches = matchSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+
   /* ---- 0. Resolve knockout teams from API (reveals knockout matches) ---- */
   try {
-    const r = await resolveKnockoutTeams(db);
+    const r = await resolveKnockoutTeams(db, null, firestoreMatches);
     r.log.forEach((m) => log.push(m));
   } catch (err) {
     console.error(`[resolver] Error: ${err.message}`);
   }
-
-  /* ---- fetch all Firestore matches ---- */
-  const matchSnap = await db.collection('matches').get();
-  const firestoreMatches = matchSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
 
   if (firestoreMatches.length === 0) {
     emit('No hay partidos en Firestore. Ejecutá primero npm run seed:fixture.');
