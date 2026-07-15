@@ -253,7 +253,9 @@ export default function StandingsPage() {
   }, [matches, selectedMatchId]);
 
   const groupedMatches = useMemo(() => {
-    const filtered = matches.filter((m) => m.locked || m.status === 'finished');
+    const PLACEHOLDER_WORDS = ['Ganador','Perdedor','1º','2º','3º','Grupo','Winner','Runner','Best'];
+    const hasRealTeams = (m) => m.homeTeam && m.awayTeam && !PLACEHOLDER_WORDS.some(p => m.homeTeam.includes(p) || m.awayTeam.includes(p));
+    const filtered = matches.filter((m) => (m.locked || m.status === 'finished' || (m.status === 'upcoming' && hasRealTeams(m))));
     const byStage = {};
     filtered.forEach((m) => {
       const stage = m.stage || 'group';
@@ -272,6 +274,7 @@ export default function StandingsPage() {
 
     const matchFinished =
       matchDetail.homeScore != null && matchDetail.awayScore != null;
+    const matchClosed = matchDetail.locked || matchFinished;
 
     const rows = [];
     const predictedIds = new Set();
@@ -308,12 +311,15 @@ export default function StandingsPage() {
       rows.push({
         user,
         prediction: pred,
-        predictionText: `${matchDetail.homeTeam} ${pred.predictedHomeScore} - ${pred.predictedAwayScore} ${matchDetail.awayTeam}`,
-        advancesText,
-        bonusHit,
+        predictionText: matchClosed
+          ? `${matchDetail.homeTeam} ${pred.predictedHomeScore} - ${pred.predictedAwayScore} ${matchDetail.awayTeam}`
+          : null,
+        predictionHidden: !matchClosed,
+        advancesText: matchClosed ? advancesText : null,
+        bonusHit: matchClosed ? bonusHit : null,
         predictedAt: pred.createdAt || pred.updatedAt,
-        result,
-        points: points != null ? points : '-',
+        result: matchClosed ? result : { icon: '🔒', text: 'No iniciado' },
+        points: matchClosed ? (points != null ? points : '-') : '-',
         didPredict: true,
       });
     }
@@ -698,13 +704,21 @@ export default function StandingsPage() {
                           <td className="px-4 py-3">
                             {row.didPredict ? (
                               <div>
-                                <span className="text-white font-medium text-xs block">
-                                  {row.predictionText}
-                                </span>
-                                {row.advancesText && (
-                                  <span className="text-xs block mt-0.5" style={{color:'#FFB800'}}>
-                                    {row.advancesText}
+                                {row.predictionHidden ? (
+                                  <span className="inline-block px-2 py-1 bg-[#2D3748]/50 text-[#94A3B8] text-xs rounded-full font-medium">
+                                    🔒 Oculto
                                   </span>
+                                ) : (
+                                  <>
+                                    <span className="text-white font-medium text-xs block">
+                                      {row.predictionText}
+                                    </span>
+                                    {row.advancesText && (
+                                      <span className="text-xs block mt-0.5" style={{color:'#FFB800'}}>
+                                        {row.advancesText}
+                                      </span>
+                                    )}
+                                  </>
                                 )}
                               </div>
                             ) : (
