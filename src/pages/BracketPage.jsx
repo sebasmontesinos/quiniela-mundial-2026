@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { subscribeToMatches } from '../services/matches';
+import { fetchAllMatches } from '../services/matches';
 import { fetchUserPredictions } from '../services/predictions';
 import { useAuth } from '../contexts/AuthContext';
 import { teamFlagComponents } from '../data/teamCrests';
@@ -126,16 +126,14 @@ export default function BracketPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsub = subscribeToMatches(
-      (list) => {
+    fetchAllMatches()
+      .then((list) => {
         const map = {};
         list.forEach(m => { if (m.stage !== 'group') map[m.id] = m; });
         setMatches(map);
         setLoading(false);
-      },
-      () => setLoading(false)
-    );
-    return () => unsub();
+      })
+      .catch(() => setLoading(false));
   }, []);
 
   useEffect(() => {
